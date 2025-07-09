@@ -1,0 +1,6 @@
+Client_ID,Client_Name,Wedding_Date,Total_Services,DJ_Cost,Photography_Cost,Videography_Cost,Travel_Cost,Equipment_Cost,Subtotal,Tax_Rate,Tax_Amount,Total_Amount,Deposit_Required,Deposit_Paid,Balance_Due,Payment_Status,Contract_Status,Last_Updated
+WED2025001,Alexandra Thompson & James Richardson,2025-06-21,3,6627.50,15460.00,12173.75,350.00,0.00,34611.25,8.75,3028.48,37639.73,11291.92,0.00,37639.73,Pending,Draft,2025-01-15
+WED2025002,Emma Martinez & David Chen,2025-08-14,1,0.00,13893.75,0.00,200.00,0.00,14093.75,8.75,1233.20,15326.95,4598.09,0.00,15326.95,Pending,Draft,2025-01-16
+WED2025003,Jessica Parker & Ryan Mitchell,2025-05-17,1,2674.00,0.00,0.00,0.00,0.00,2674.00,8.75,233.98,2907.98,872.39,0.00,2907.98,Pending,Draft,2025-01-17
+WED2025004,Sophia Williams & Marcus Johnson,2025-09-06,2,0.00,6300.00,4765.00,0.00,0.00,11065.00,8.75,968.19,12033.19,3609.96,0.00,12033.19,Pending,Draft,2025-01-18
+WED2025005,Ashley Davis & Christopher Brown,2025-02-14,2,1699.00,3596.00,0.00,0.00,0.00,5295.00,8.75,463.31,5758.31,5758.31,0.00,5758.31,Urgent,Draft,2025-01-19

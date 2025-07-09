@@ -1,0 +1,26 @@
+Report_Type,Metric,Value,Period,Notes
+Revenue,Total Contracted Revenue,73365.16,January 2025,Sum of all 5 test contracts
+Revenue,Average Contract Value,14673.03,January 2025,Total revenue divided by 5 contracts
+Revenue,DJ Revenue,10000.50,January 2025,Revenue from DJ services only
+Revenue,Photography Revenue,39249.75,January 2025,Revenue from photography services
+Revenue,Videography Revenue,16938.75,January 2025,Revenue from videography services
+Revenue,Travel Revenue,550.00,January 2025,Additional travel charges
+Services,DJ Bookings,3,January 2025,Number of DJ service bookings
+Services,Photography Bookings,4,January 2025,Number of photography bookings
+Services,Videography Bookings,2,January 2025,Number of videography bookings
+Services,Full Package Bookings,1,January 2025,All three services booked
+Services,Single Service Bookings,2,January 2025,Only one service booked
+Client_Analysis,Average Guest Count,110,January 2025,Average across all bookings
+Client_Analysis,Weekend Bookings,4,January 2025,Saturday/Sunday weddings
+Client_Analysis,Weekday Bookings,1,January 2025,Monday-Friday weddings
+Client_Analysis,Luxury Tier Clients,1,January 2025,Contracts over $30000
+Client_Analysis,Budget Tier Clients,1,January 2025,Contracts under $5000
+Client_Analysis,Standard Tier Clients,3,January 2025,Contracts $5000-$30000
+Payment_Analysis,Deposit Pending,5,January 2025,Contracts awaiting deposit
+Payment_Analysis,Total Deposits Due,28978.76,January 2025,Sum of all pending deposits
+Payment_Analysis,Rush Bookings,1,January 2025,Bookings within 30 days
+Referral_Analysis,Wedding Planner Referrals,1,January 2025,Referred by wedding planners
+Referral_Analysis,Social Media Discovery,1,January 2025,Found via Instagram/social
+Referral_Analysis,Google Search,1,January 2025,Found via search engines
+Referral_Analysis,Friend Referrals,1,January 2025,Word of mouth referrals
+Referral_Analysis,Venue Referrals,1,January 2025,Referred by venues

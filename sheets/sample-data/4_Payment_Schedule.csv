@@ -1,0 +1,11 @@
+Client_ID,Payment_Number,Payment_Type,Due_Date,Amount_Due,Amount_Paid,Payment_Status,Payment_Method,Transaction_ID,Notes,Days_Until_Wedding,Percentage_of_Total,Late_Fee_Applied,Late_Fee_Amount
+WED001,1,Deposit,2024-02-15,4635.47,4635.47,Paid,Credit Card,TXN001,Initial deposit,120,25,No,0
+WED001,2,Progress Payment,2024-04-15,4635.47,0,Pending,,,Second payment,60,25,No,0
+WED001,3,Progress Payment,2024-05-15,4635.47,0,Scheduled,,,Third payment,30,25,No,0
+WED001,4,Final Payment,2024-06-08,4635.47,0,Scheduled,,,Final payment due 1 week before,7,25,No,0
+WED002,1,Full Payment,2024-02-20,12528,12528,Paid,Check,CHK001,Full payment received,150,100,No,0
+WED003,1,Deposit,2024-02-10,2143.74,2143.74,Paid,Bank Transfer,BT001,Initial deposit,180,25,No,0
+WED003,2,Bi-weekly Payment,2024-02-24,1607.8,0,Pending,,,Bi-weekly payment 1,166,18.75,No,0
+WED003,3,Bi-weekly Payment,2024-03-10,1607.8,0,Scheduled,,,Bi-weekly payment 2,152,18.75,No,0
+WED003,4,Bi-weekly Payment,2024-03-24,1607.8,0,Scheduled,,,Bi-weekly payment 3,138,18.75,No,0
+WED003,5,Final Payment,2024-08-03,1607.8,0,Scheduled,,,Final payment,7,18.75,No,0

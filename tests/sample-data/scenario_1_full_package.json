@@ -1,0 +1,83 @@
+{
+  "scenario": "Full Package Premium Wedding",
+  "client_id": "WED2025001",
+  "timestamp": "2025-01-15 10:30:00",
+  "form_responses": {
+    "client_information": {
+      "primary_contact_name": "Alexandra Victoria Thompson",
+      "primary_contact_email": "alexandra.thompson@email.com",
+      "primary_contact_phone": "555-0101",
+      "secondary_contact_name": "James Michael Richardson",
+      "secondary_contact_email": "james.richardson@email.com",
+      "secondary_contact_phone": "555-0102",
+      "mailing_address": "1247 Luxury Lane",
+      "city": "Beverly Hills",
+      "state": "CA",
+      "zip_code": "90210"
+    },
+    "wedding_details": {
+      "wedding_date": "2025-06-21",
+      "ceremony_time": "4:00 PM",
+      "reception_start": "6:30 PM",
+      "reception_end": "12:00 AM",
+      "guest_count": 200,
+      "wedding_party_size": 16
+    },
+    "venue_information": {
+      "ceremony_venue_name": "Ritz-Carlton Laguna Niguel",
+      "ceremony_venue_address": "1 Ritz Carlton Dr, Dana Point, CA 92629",
+      "reception_venue_name": "Ritz-Carlton Laguna Niguel",
+      "reception_venue_address": "1 Ritz Carlton Dr, Dana Point, CA 92629",
+      "venue_contact": "Sarah Martinez",
+      "venue_phone": "949-240-2000"
+    },
+    "service_selections": {
+      "dj_service": true,
+      "dj_package": "Premium",
+      "dj_hours": 8,
+      "dj_special_requests": "Uplighting in blush and gold, wireless microphones for ceremony, specific playlist for cocktail hour, photo booth integration",
+      "photography_service": true,
+      "photography_package": "Deluxe",
+      "photography_hours": 12,
+      "photography_locations": "Getting ready, ceremony, cocktail hour, reception, couple portraits",
+      "photography_special_requests": "Drone shots for ceremony, second photographer for getting ready, engagement session included",
+      "videography_service": true,
+      "videography_package": "Cinematic",
+      "videography_hours": 10,
+      "videography_style": "Cinematic",
+      "videography_special_requests": "Drone footage, highlight reel, live streaming for remote family members"
+    },
+    "budget_information": {
+      "total_budget": 18000,
+      "budget_dj": 4000,
+      "budget_photography": 8000,
+      "budget_videography": 6000,
+      "payment_preference": "Monthly installments"
+    },
+    "special_requirements": {
+      "dietary_restrictions": "Kosher meal required for vendor",
+      "accessibility_needs": "Wheelchair accessible setup required",
+      "additional_notes": "This is a luxury wedding with high expectations. Client wants premium service throughout. Timeline is critical due to sunset ceremony timing.",
+      "weather_backup_plan": "Indoor ballroom available"
+    },
+    "marketing_and_referral": {
+      "referral_source": "Wedding planner recommendation",
+      "marketing_consent": true,
+      "social_media_sharing": true
+    }
+  },
+  "expected_calculations": {
+    "base_dj_cost": 1800,
+    "dj_addons": 600,
+    "base_photography_cost": 4000,
+    "photography_addons": 1400,
+    "base_videography_cost": 3500,
+    "videography_addons": 1400,
+    "travel_charges": 200,
+    "weekend_multiplier": 1.25,
+    "guest_count_multiplier": 1.75,
+    "subtotal_estimate": 16000,
+    "tax_estimate": 1400,
+    "total_estimate": 17400
+  }
+}

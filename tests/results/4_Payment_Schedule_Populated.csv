@@ -1,0 +1,12 @@
+Client_ID,Payment_Number,Payment_Type,Amount,Due_Date,Status,Payment_Method,Notes
+WED2025001,1,Deposit,11291.92,2025-02-15,Pending,TBD,30% deposit due upon contract signing
+WED2025001,2,Progress Payment,12546.58,2025-04-21,Scheduled,TBD,Second payment due 60 days before wedding
+WED2025001,3,Final Payment,13801.23,2025-06-07,Scheduled,TBD,Final payment due 14 days before wedding
+WED2025002,1,Deposit,7663.48,2025-02-16,Pending,TBD,50% deposit for destination wedding
+WED2025002,2,Final Payment,7663.47,2025-07-31,Scheduled,TBD,Final payment due 14 days before wedding
+WED2025003,1,Deposit,1453.99,2025-02-17,Pending,TBD,50% deposit due upon contract signing
+WED2025003,2,Final Payment,1453.99,2025-05-03,Scheduled,TBD,Final payment due 14 days before wedding
+WED2025004,1,Deposit,4011.06,2025-02-18,Pending,TBD,33.33% deposit due upon contract signing
+WED2025004,2,Progress Payment,4011.07,2025-06-06,Scheduled,TBD,Second payment due 90 days before wedding
+WED2025004,3,Final Payment,4011.06,2025-08-23,Scheduled,TBD,Final payment due 14 days before wedding
+WED2025005,1,Full Payment,5758.31,2025-01-26,Urgent,TBD,Full payment due within 7 days for rush booking

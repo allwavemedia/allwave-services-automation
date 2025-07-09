@@ -1,0 +1,79 @@
+{
+  "scenario": "DJ-Only Budget Wedding",
+  "client_id": "WED2025003",
+  "timestamp": "2025-01-17 09:15:00",
+  "form_responses": {
+    "client_information": {
+      "primary_contact_name": "Jessica Lynn Parker",
+      "primary_contact_email": "jessica.parker@email.com",
+      "primary_contact_phone": "555-0301",
+      "secondary_contact_name": "Ryan Thomas Mitchell",
+      "secondary_contact_email": "ryan.mitchell@email.com",
+      "secondary_contact_phone": "555-0302",
+      "mailing_address": "456 Oak Street",
+      "city": "Riverside",
+      "state": "CA",
+      "zip_code": "92501"
+    },
+    "wedding_details": {
+      "wedding_date": "2025-05-17",
+      "ceremony_time": "3:00 PM",
+      "reception_start": "5:00 PM",
+      "reception_end": "10:00 PM",
+      "guest_count": 100,
+      "wedding_party_size": 10
+    },
+    "venue_information": {
+      "ceremony_venue_name": "Riverside Community Center",
+      "ceremony_venue_address": "3900 Main St, Riverside, CA 92501",
+      "reception_venue_name": "Riverside Community Center",
+      "reception_venue_address": "3900 Main St, Riverside, CA 92501",
+      "venue_contact": "Tom Wilson",
+      "venue_phone": "951-826-5273"
+    },
+    "service_selections": {
+      "dj_service": true,
+      "dj_package": "Standard",
+      "dj_hours": 7,
+      "dj_special_requests": "Karaoke setup for reception, specific country music playlist, wireless microphones for ceremony and toasts, uplighting in purple and silver",
+      "photography_service": false,
+      "photography_package": "",
+      "photography_hours": 0,
+      "photography_locations": "",
+      "photography_special_requests": "",
+      "videography_service": false,
+      "videography_package": "",
+      "videography_hours": 0,
+      "videography_style": "",
+      "videography_special_requests": ""
+    },
+    "budget_information": {
+      "total_budget": 2500,
+      "budget_dj": 2500,
+      "budget_photography": 0,
+      "budget_videography": 0,
+      "payment_preference": "Two payments"
+    },
+    "special_requirements": {
+      "dietary_restrictions": "None",
+      "accessibility_needs": "None",
+      "additional_notes": "Budget-friendly wedding with focus on dancing and fun. Karaoke is very important to the couple. Need good sound system for speeches.",
+      "weather_backup_plan": "Indoor venue only"
+    },
+    "marketing_and_referral": {
+      "referral_source": "Friend recommendation",
+      "marketing_consent": false,
+      "social_media_sharing": false
+    }
+  },
+  "expected_calculations": {
+    "base_dj_cost": 1200,
+    "dj_addons": 500,
+    "travel_charges": 0,
+    "weekend_multiplier": 1.2,
+    "guest_count_multiplier": 0.5,
+    "subtotal_estimate": 2100,
+    "tax_estimate": 184,
+    "total_estimate": 2284
+  }
+}

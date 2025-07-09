@@ -1,0 +1,12 @@
+Client_ID,Service_Category,Service_Type,Package_Name,Base_Price,Hours_Booked,Hourly_Rate,Service_Total,Add_Ons,Add_On_Cost,Guest_Count,Guest_Multiplier,Guest_Adjustment,Weekend_Multiplier,Weekend_Adjustment,Seasonal_Multiplier,Seasonal_Adjustment,Final_Service_Cost,Notes
+WED2025001,DJ,Standard,Premium DJ Package,1800,8,150,3000,Uplighting + Photo Booth,600,200,1.75,1750,1.25,875,1.15,402.5,6627.5,Luxury wedding premium pricing
+WED2025001,Photography,Standard,Deluxe Photography,4000,12,300,7600,Drone + Second Photographer + Engagement,2200,200,1.5,3000,1.2,1520,1.15,1140,15460,Premium package with all add-ons
+WED2025001,Videography,Standard,Cinematic Package,3500,10,300,6500,Drone + Live Streaming,1400,200,0.75,1500,1.25,1625,1.15,1148.75,12173.75,Full cinematic production
+WED2025001,Travel,Distance,Regional Service,200,0,0,200,Hotel Accommodation,150,200,0,0,1,0,1,0,350,Destination venue charges
+WED2025002,Photography,Standard,Premium Photography,6000,10,350,9500,Engagement + Drone,1200,50,1.75,875,1.15,1092.5,1.15,1226.25,13893.75,Destination beach wedding
+WED2025002,Travel,Distance,Regional Service,200,0,0,200,,,50,0,0,1,0,1,0,200,La Jolla travel charges
+WED2025003,DJ,Standard,Standard DJ Package,1200,7,125,2075,Karaoke + Uplighting,300,100,0.5,50,1.2,249,1,0,2674,Budget-friendly package
+WED2025004,Photography,Standard,Standard Photography,2500,8,250,4500,Second Photographer,600,125,1.25,625,1.15,575,1,0,6300,Garden wedding standard package
+WED2025004,Videography,Standard,Basic Videography,2000,6,250,3500,Highlight Reel,800,125,0.5,62.5,1.15,402.5,1,0,4765,Documentary style videography
+WED2025005,DJ,Standard,Basic DJ Package,800,5,100,1300,Beach Equipment,100,75,0,0,1.2,156,1.1,143,1699,Valentine's Day rush premium
+WED2025005,Photography,Standard,Basic Photography,1500,6,200,2700,Rush Processing,200,75,1,75,1.2,324,1.1,297,3596,Last-minute booking premium

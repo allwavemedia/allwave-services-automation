@@ -1,0 +1,81 @@
+{
+  "scenario": "Photography + Videography (No DJ)",
+  "client_id": "WED2025004",
+  "timestamp": "2025-01-18 16:45:00",
+  "form_responses": {
+    "client_information": {
+      "primary_contact_name": "Sophia Grace Williams",
+      "primary_contact_email": "sophia.williams@email.com",
+      "primary_contact_phone": "555-0401",
+      "secondary_contact_name": "Marcus Anthony Johnson",
+      "secondary_contact_email": "marcus.johnson@email.com",
+      "secondary_contact_phone": "555-0402",
+      "mailing_address": "789 Maple Avenue",
+      "city": "Pasadena",
+      "state": "CA",
+      "zip_code": "91101"
+    },
+    "wedding_details": {
+      "wedding_date": "2025-09-06",
+      "ceremony_time": "4:30 PM",
+      "reception_start": "6:00 PM",
+      "reception_end": "11:30 PM",
+      "guest_count": 125,
+      "wedding_party_size": 12
+    },
+    "venue_information": {
+      "ceremony_venue_name": "Descanso Gardens",
+      "ceremony_venue_address": "1418 Descanso Dr, La Cañada Flintridge, CA 91011",
+      "reception_venue_name": "Descanso Gardens",
+      "reception_venue_address": "1418 Descanso Dr, La Cañada Flintridge, CA 91011",
+      "venue_contact": "Jennifer Adams",
+      "venue_phone": "818-949-4200"
+    },
+    "service_selections": {
+      "dj_service": false,
+      "dj_package": "",
+      "dj_hours": 0,
+      "dj_special_requests": "Client has their own DJ - cousin who is a professional",
+      "photography_service": true,
+      "photography_package": "Standard",
+      "photography_hours": 8,
+      "photography_locations": "Garden ceremony, reception venue, couple portraits in rose garden",
+      "photography_special_requests": "Documentary style preferred, candid moments focus, second photographer for getting ready shots",
+      "videography_service": true,
+      "videography_package": "Basic",
+      "videography_hours": 6,
+      "videography_style": "Documentary",
+      "videography_special_requests": "Highlight reel with couple's favorite songs, focus on emotional moments and speeches"
+    },
+    "budget_information": {
+      "total_budget": 6000,
+      "budget_dj": 0,
+      "budget_photography": 3500,
+      "budget_videography": 2500,
+      "payment_preference": "Three payments"
+    },
+    "special_requirements": {
+      "dietary_restrictions": "Vegetarian meal for vendors",
+      "accessibility_needs": "Elderly grandparents need close parking",
+      "additional_notes": "Garden wedding with natural lighting focus. Couple prefers documentary style over posed shots. Their cousin is providing DJ services.",
+      "weather_backup_plan": "Covered pavilion available"
+    },
+    "marketing_and_referral": {
+      "referral_source": "Google search",
+      "marketing_consent": true,
+      "social_media_sharing": true
+    }
+  },
+  "expected_calculations": {
+    "base_photography_cost": 2500,
+    "photography_addons": 600,
+    "base_videography_cost": 2000,
+    "videography_addons": 800,
+    "travel_charges": 0,
+    "weekend_multiplier": 1.15,
+    "guest_count_multiplier": 1.25,
+    "subtotal_estimate": 6900,
+    "tax_estimate": 604,
+    "total_estimate": 7504
+  }
+}

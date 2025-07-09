@@ -1,0 +1,23 @@
+Report_Type,Period,Metric,Value,Percentage,Comparison_Period,Comparison_Value,Growth_Rate,Notes
+Revenue,Monthly,Total Revenue,43162.93,100,Previous Month,38450.21,12.26,Strong growth in bookings
+Revenue,Monthly,DJ Revenue,4950,11.47,Previous Month,4200,17.86,Increased premium package sales
+Revenue,Monthly,Photography Revenue,22400,51.91,Previous Month,20100,11.44,Consistent demand
+Revenue,Monthly,Videography Revenue,9200,21.32,Previous Month,8500,8.24,Growing video demand
+Revenue,Monthly,Add-ons Revenue,2800,6.49,Previous Month,2400,16.67,Successful upselling
+Revenue,Monthly,Travel Fees,1200,2.78,Previous Month,1100,9.09,More destination weddings
+Revenue,Monthly,Equipment Fees,400,0.93,Previous Month,350,14.29,Equipment rental growth
+Bookings,Monthly,Total Bookings,15,100,Previous Month,13,15.38,Seasonal increase
+Bookings,Monthly,DJ Only,2,13.33,Previous Month,3,-33.33,Decline in DJ-only bookings
+Bookings,Monthly,Photography Only,4,26.67,Previous Month,3,33.33,Photography demand up
+Bookings,Monthly,Full Package,6,40,Previous Month,4,50,Full package popularity
+Bookings,Monthly,Custom Package,3,20,Previous Month,3,0,Stable custom requests
+Client_Analysis,Monthly,Average Deal Size,2877.53,100,Previous Month,2957.71,-2.71,Slight decrease in average
+Client_Analysis,Monthly,Conversion Rate,0.75,100,Previous Month,0.68,10.29,Improved sales process
+Client_Analysis,Monthly,Repeat Clients,2,13.33,Previous Month,1,100,Growing referral base
+Client_Analysis,Monthly,Referral Rate,0.4,100,Previous Month,0.35,14.29,Strong word-of-mouth
+Seasonal,Q2,Wedding Count,45,100,Q1,32,40.63,Peak season performance
+Seasonal,Q2,Average Guest Count,165,100,Q1,148,11.49,Larger celebrations
+Seasonal,Q2,Weekend Premium,1.22,100,Q1,1.18,3.39,Higher weekend demand
+Geographic,Regional,Local Bookings,8,53.33,Previous Month,7,14.29,Strong local presence
+Geographic,Regional,Regional Bookings,5,33.33,Previous Month,4,25,Expanding reach
+Geographic,Regional,Destination Bookings,2,13.33,Previous Month,2,0,Stable destination market

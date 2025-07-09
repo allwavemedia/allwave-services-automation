@@ -1,0 +1,82 @@
+{
+  "scenario": "Last-Minute Wedding (Edge Case)",
+  "client_id": "WED2025005",
+  "timestamp": "2025-01-19 11:30:00",
+  "form_responses": {
+    "client_information": {
+      "primary_contact_name": "Ashley Nicole Davis",
+      "primary_contact_email": "ashley.davis@email.com",
+      "primary_contact_phone": "555-0501",
+      "secondary_contact_name": "Christopher James Brown",
+      "secondary_contact_email": "chris.brown@email.com",
+      "secondary_contact_phone": "555-0502",
+      "mailing_address": "321 Pine Street",
+      "city": "Santa Monica",
+      "state": "CA",
+      "zip_code": "90401"
+    },
+    "wedding_details": {
+      "wedding_date": "2025-02-14",
+      "ceremony_time": "2:00 PM",
+      "reception_start": "3:30 PM",
+      "reception_end": "8:00 PM",
+      "guest_count": 75,
+      "wedding_party_size": 6
+    },
+    "venue_information": {
+      "ceremony_venue_name": "Santa Monica Pier",
+      "ceremony_venue_address": "200 Santa Monica Pier, Santa Monica, CA 90401",
+      "reception_venue_name": "Shutters on the Beach",
+      "reception_venue_address": "1 Pico Blvd, Santa Monica, CA 90405",
+      "venue_contact": "Lisa Thompson",
+      "venue_phone": "310-458-0030"
+    },
+    "service_selections": {
+      "dj_service": true,
+      "dj_package": "Basic",
+      "dj_hours": 5,
+      "dj_special_requests": "Beach-appropriate equipment, wireless setup, romantic playlist for ceremony, party music for reception",
+      "photography_service": true,
+      "photography_package": "Basic",
+      "photography_hours": 6,
+      "photography_locations": "Beach ceremony, pier portraits, reception venue",
+      "photography_special_requests": "Quick turnaround needed for photos, focus on key moments due to shorter timeline",
+      "videography_service": false,
+      "videography_package": "",
+      "videography_hours": 0,
+      "videography_style": "",
+      "videography_special_requests": ""
+    },
+    "budget_information": {
+      "total_budget": 3500,
+      "budget_dj": 1500,
+      "budget_photography": 2000,
+      "budget_videography": 0,
+      "payment_preference": "Lump sum"
+    },
+    "special_requirements": {
+      "dietary_restrictions": "None",
+      "accessibility_needs": "Beach wheelchair access needed",
+      "additional_notes": "Last-minute Valentine's Day wedding. Short notice booking (3 weeks). Need quick confirmation and contract turnaround. Beach ceremony weather dependent.",
+      "weather_backup_plan": "Hotel indoor space available"
+    },
+    "marketing_and_referral": {
+      "referral_source": "Venue recommendation",
+      "marketing_consent": true,
+      "social_media_sharing": true
+    }
+  },
+  "expected_calculations": {
+    "base_dj_cost": 800,
+    "dj_addons": 100,
+    "base_photography_cost": 1500,
+    "photography_addons": 0,
+    "travel_charges": 0,
+    "weekend_multiplier": 1.2,
+    "rush_fee": 200,
+    "valentine_premium": 1.1,
+    "subtotal_estimate": 3200,
+    "tax_estimate": 280,
+    "total_estimate": 3480
+  }
+}

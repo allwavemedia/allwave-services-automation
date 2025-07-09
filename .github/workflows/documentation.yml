@@ -1,0 +1,54 @@
+
+name: Documentation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: [ 'docs/**', '*.md' ]
+  pull_request:
+    branches: [ main ]
+    paths: [ 'docs/**', '*.md' ]
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    name: Check Documentation Links
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Check markdown links
+      uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'
+        use-verbose-mode: 'yes'
+        config-file: '.github/markdown-link-check-config.json'
+        
+  validate-structure:
+    runs-on: ubuntu-latest
+    name: Validate Repository Structure
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Validate directory structure
+      run: |
+        # Check required directories exist
+        required_dirs=("docs" "src" "forms" "sheets" "contracts" "tests" "examples")
+        for dir in "${required_dirs[@]}"; do
+          if [ ! -d "$dir" ]; then
+            echo "Error: Required directory '$dir' is missing"
+            exit 1
+          fi
+        done
+        
+        # Check required files exist
+        required_files=("README.md" "LICENSE" "CONTRIBUTING.md" "CHANGELOG.md" ".gitignore")
+        for file in "${required_files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "Error: Required file '$file' is missing"
+            exit 1
+          fi
+        done
+        
+        echo "Repository structure validation passed"

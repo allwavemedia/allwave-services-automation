@@ -1,0 +1,4 @@
+Client_ID,State,County,City,Base_Tax_Rate,County_Tax_Rate,City_Tax_Rate,Total_Tax_Rate,Services_Subtotal,Taxable_Amount,Tax_Exempt_Amount,Sales_Tax,Processing_Fee_Rate,Processing_Fee,Late_Fee_Rate,Late_Fee_Applied,Late_Fee_Amount,Convenience_Fee,Total_Fees,Grand_Total
+WED001,CA,Los Angeles,Beverly Hills,0.0725,0.01,0.005,0.0875,17050,17050,0,1491.88,0.03,511.53,0.05,No,0,25,536.53,19078.41
+WED002,NY,Nassau,Garden City,0.08,0.0075,0,0.0875,11520,11520,0,1008,0.025,288,0.05,No,0,0,288,12816
+WED003,FL,Miami-Dade,Miami Beach,0.07,0.015,0.0025,0.0875,7885,7885,0,689.94,0.02,157.7,0.05,No,0,15,172.7,8747.64
