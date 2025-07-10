@@ -1025,18 +1025,177 @@ function addAdditionalDetailsSection(form) {
   form.addParagraphTextItem().setTitle('Additional Comments or Questions').setRequired(false);
 }
 
-// Fix date formatting in formatFieldValue
-function formatFieldValue(value) {
-  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
-    // Format as MM/dd/yyyy
-    const mm = String(value.getMonth() + 1).padStart(2, '0');
-    const dd = String(value.getDate()).padStart(2, '0');
-    const yyyy = value.getFullYear();
-    return `${mm}/${dd}/${yyyy}`;
+/**
+ * Sets up form submission trigger for automated processing.
+ * This function creates a trigger that fires when the form is submitted.
+ * @param {GoogleAppsScript.Forms.Form} form The form to attach the trigger to.
+ */
+function setupFormSubmissionTrigger(form) {
+  try {
+    const formId = form.getId();
+    // Clean up old triggers to prevent duplicates
+    const existingTriggers = ScriptApp.getUserTriggers(form);
+    for (const trigger of existingTriggers) {
+      if (trigger.getHandlerFunction() === 'onEnhancedFormSubmit') {
+        ScriptApp.deleteTrigger(trigger);
+      }
+    }
+
+    // Create a new trigger
+    ScriptApp.newTrigger('onEnhancedFormSubmit')
+      .forForm(formId)
+      .onFormSubmit()
+      .create();
+    
+    console.log(`Form submission trigger created successfully for form ID: ${formId}`);
+    
+  } catch (error) {
+    console.error(`Error setting up form submission trigger: ${error.message}`);
+    throw new Error(`Failed to create form submission trigger: ${error.message}`);
   }
-  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-  if (value === null || value === undefined) return '';
-  return String(value);
+}
+
+/**
+ * PHASE 3: CALCULATION ENGINE & DATA PROCESSING
+ */
+
+/**
+ * Calculates estimated pricing based on selected services and options
+ * @param {Object} formData The form data object containing user responses
+ * @returns {number} The estimated total cost
+ */
+function calculateEstimatedPricing(formData) {
+  let total = 0;
+  
+  // Pricing logic based on selected services
+  if (formData['Which services are you interested in?']) {
+    const services = formData['Which services are you interested in?'].split(', ');
+    
+    // DJ Services pricing
+    if (services.includes('DJ Services')) {
+      if (formData['DJ Service Package']) {
+        switch (formData['DJ Service Package']) {
+          case 'Basic Package - 4 hours, basic sound system, music only':
+            total += 400;
+            break;
+          case 'Standard Package - 6 hours, professional sound system, MC services':
+            total += 600;
+            break;
+          case 'Premium Package - 8 hours, premium sound system, MC services, lighting':
+            total += 800;
+            break;
+          case 'Deluxe Package - Full day, premium equipment, MC, lighting, special effects':
+            total += 1000;
+            break;
+        }
+      }
+    }
+    
+    // Photography pricing
+    if (services.includes('Photography')) {
+      if (formData['Photography Package']) {
+        switch (formData['Photography Package']) {
+          case 'Essential Package - 4 hours, 200+ edited photos, online gallery':
+            total += 800;
+            break;
+          case 'Classic Package - 6 hours, 400+ edited photos, online gallery, USB drive':
+            total += 1200;
+            break;
+          case 'Premium Package - 8 hours, 600+ edited photos, online gallery, USB drive, prints':
+            total += 1600;
+            break;
+          case 'Complete Package - Full day, 800+ edited photos, online gallery, USB drive, prints, album':
+            total += 2000;
+            break;
+        }
+      }
+    }
+    
+    // Videography pricing
+    if (services.includes('Videography')) {
+      if (formData['Videography Package']) {
+        switch (formData['Videography Package']) {
+          case 'Highlight Package - 3-5 minute highlight reel, ceremony footage':
+            total += 500;
+            break;
+          case 'Standard Package - 10-15 minute edited video, ceremony and reception':
+            total += 1000;
+            break;
+          case 'Premium Package - 20-30 minute edited video, multiple cameras, drone footage':
+            total += 1500;
+            break;
+          case 'Cinematic Package - Full cinematic experience, multiple cameras, drone, same-day edit':
+            total += 2000;
+            break;
+        }
+      }
+    }
+  }
+  
+  // Add-ons and special requests
+  if (formData['Additional Services']) {
+    const addons = formData['Additional Services'].split(', ');
+    
+    addons.forEach(addon => {
+      switch (addon) {
+        case 'Engagement session':
+          total += 300;
+          break;
+        case 'Rehearsal dinner coverage':
+          total += 400;
+          break;
+        case 'Brunch/next day coverage':
+          total += 300;
+          break;
+        case 'Bachelor/bachelorette party':
+          total += 500;
+          break;
+        case 'Photo booth rental':
+          total += 600;
+          break;
+        case 'Live streaming service':
+          total += 500;
+          break;
+        case 'Social media package':
+          total += 300;
+          break;
+        case 'Rush delivery/editing':
+          total += 200;
+          break;
+      }
+    });
+  }
+  
+  // Return the estimated total cost
+  return total;
+}
+
+/**
+ * onEnhancedFormSubmit trigger function
+ * This function is called automatically when the form is submitted.
+ * It processes the form data and updates the contract tracking sheet.
+ */
+function onEnhancedFormSubmit(e) {
+  try {
+    const formData = e.values;
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Contract Tracking');
+    
+    // Find the next available row in the contract tracking sheet
+    const nextRow = sheet.getLastRow() + 1;
+    
+    // Set the values for the new row
+    sheet.getRange(nextRow, 1, 1, formData.length).setValues([formData]);
+    
+    // Calculate and set the estimated pricing
+    const estimatedTotal = calculateEstimatedPricing(formData);
+    sheet.getRange(nextRow, 10).setValue(estimatedTotal);
+    
+    // Log the submission for debugging
+    console.log(`Form submitted: ${JSON.stringify(formData)}`);
+    
+  } catch (error) {
+    console.error('Error processing form submission:', error);
+  }
 }
 
 /**
