@@ -1711,6 +1711,181 @@ function runSmokeTest() {
  */
 
 /**
+ * Creates a comprehensive spreadsheet for wedding contract management
+ * This spreadsheet will store form responses and contract tracking data
+ */
+function createWeddingContractSpreadsheet() {
+  try {
+    // Create a new spreadsheet
+    const spreadsheet = SpreadsheetApp.create('Wedding Services Contract Management');
+    
+    // Set up the main responses sheet (this will be automatically linked to the form)
+    const responsesSheet = spreadsheet.getSheets()[0];
+    responsesSheet.setName('Form Responses');
+    
+    // Create contract tracking sheet
+    const contractsSheet = spreadsheet.insertSheet('Contract Tracking');
+    setupContractTrackingSheet(contractsSheet);
+    
+    // Create status tracking sheet
+    const statusSheet = spreadsheet.insertSheet('Status Tracking');
+    setupStatusTrackingSheet(statusSheet);
+    
+    // Create pricing calculator sheet
+    const pricingSheet = spreadsheet.insertSheet('Pricing Calculator');
+    setupPricingCalculatorSheet(pricingSheet);
+    
+    console.log(`Wedding contract spreadsheet created: ${spreadsheet.getName()}`);
+    return spreadsheet;
+    
+  } catch (error) {
+    console.error('Error creating wedding contract spreadsheet:', error);
+    throw error;
+  }
+}
+
+/**
+ * Sets up the contract tracking sheet with proper headers and formatting
+ */
+function setupContractTrackingSheet(sheet) {
+  // Set up headers
+  const headers = [
+    'Contract ID',
+    'Client Names', 
+    'Email',
+    'Phone',
+    'Wedding Date',
+    'Services Requested',
+    'Venue',
+    'Guest Count',
+    'Budget Range',
+    'Estimated Total',
+    'Contract Status',
+    'Date Created',
+    'Date Modified',
+    'Notes'
+  ];
+  
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  
+  // Format the header row
+  const headerRange = sheet.getRange(1, 1, 1, headers.length);
+  headerRange.setFontWeight('bold');
+  headerRange.setBackground('#4285f4');
+  headerRange.setFontColor('#ffffff');
+  
+  // Set column widths for better readability
+  sheet.setColumnWidth(1, 120); // Contract ID
+  sheet.setColumnWidth(2, 200); // Client Names
+  sheet.setColumnWidth(3, 200); // Email
+  sheet.setColumnWidth(4, 120); // Phone
+  sheet.setColumnWidth(5, 120); // Wedding Date
+  sheet.setColumnWidth(6, 250); // Services
+  sheet.setColumnWidth(7, 200); // Venue
+  sheet.setColumnWidth(8, 100); // Guest Count
+  sheet.setColumnWidth(9, 120); // Budget Range
+  sheet.setColumnWidth(10, 120); // Estimated Total
+  sheet.setColumnWidth(11, 150); // Contract Status
+  sheet.setColumnWidth(12, 120); // Date Created
+  sheet.setColumnWidth(13, 120); // Date Modified
+  sheet.setColumnWidth(14, 300); // Notes
+  
+  // Freeze the header row
+  sheet.setFrozenRows(1);
+}
+
+/**
+ * Sets up the status tracking sheet for workflow management
+ */
+function setupStatusTrackingSheet(sheet) {
+  const headers = [
+    'Contract ID',
+    'Client Names',
+    'Wedding Date',
+    'Form Submitted',
+    'Initial Contact Made', 
+    'Quote Provided',
+    'Contract Sent',
+    'Contract Signed',
+    'Deposit Received',
+    'Final Payment Received',
+    'Services Completed',
+    'Current Status',
+    'Next Action',
+    'Due Date',
+    'Assigned To',
+    'Priority'
+  ];
+  
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  
+  // Format the header row
+  const headerRange = sheet.getRange(1, 1, 1, headers.length);
+  headerRange.setFontWeight('bold');
+  headerRange.setBackground('#34a853');
+  headerRange.setFontColor('#ffffff');
+  
+  // Set column widths
+  sheet.setColumnWidth(1, 120);
+  sheet.setColumnWidth(2, 200);
+  sheet.setColumnWidth(3, 120);
+  for (let i = 4; i <= 11; i++) {
+    sheet.setColumnWidth(i, 120);
+  }
+  sheet.setColumnWidth(12, 150);
+  sheet.setColumnWidth(13, 200);
+  sheet.setColumnWidth(14, 120);
+  sheet.setColumnWidth(15, 120);
+  sheet.setColumnWidth(16, 100);
+  
+  sheet.setFrozenRows(1);
+}
+
+/**
+ * Sets up the pricing calculator sheet with service rates and formulas
+ */
+function setupPricingCalculatorSheet(sheet) {
+  // Service pricing table
+  const pricingData = [
+    ['Service', 'Base Rate', 'Per Hour Rate', 'Notes'],
+    ['Wedding Photography', 1500, 200, 'Basic package includes 4 hours'],
+    ['Wedding Videography', 2000, 250, 'Includes editing and highlights'],
+    ['DJ/Music Services', 800, 100, 'Includes basic sound system'],
+    ['Lighting Setup', 400, 50, 'Ambient and dance lighting'],
+    ['Audio/Sound System', 300, 40, 'Ceremony and reception'],
+    ['Photo Booth', 600, 75, 'Props and prints included'],
+    ['Live Streaming', 500, 60, 'Professional streaming setup'],
+    ['Drone Photography/Video', 400, 80, 'Weather dependent'],
+    ['Additional Photographer', 300, 60, 'Second shooter'],
+    ['Rush Delivery', 200, 0, 'Expedited editing/delivery']
+  ];
+  
+  sheet.getRange(1, 1, pricingData.length, pricingData[0].length).setValues(pricingData);
+  
+  // Format the pricing table
+  const headerRange = sheet.getRange(1, 1, 1, 4);
+  headerRange.setFontWeight('bold');
+  headerRange.setBackground('#ff9900');
+  headerRange.setFontColor('#ffffff');
+  
+  // Set column widths
+  sheet.setColumnWidth(1, 200);
+  sheet.setColumnWidth(2, 120);
+  sheet.setColumnWidth(3, 120);
+  sheet.setColumnWidth(4, 300);
+  
+  sheet.setFrozenRows(1);
+  
+  // Add calculation formulas section
+  sheet.getRange(pricingData.length + 2, 1).setValue('Package Calculator');
+  sheet.getRange(pricingData.length + 2, 1).setFontWeight('bold').setFontSize(14);
+  
+  const calculatorHeaders = ['Selected Service', 'Hours', 'Calculated Cost'];
+  sheet.getRange(pricingData.length + 3, 1, 1, 3).setValues([calculatorHeaders]);
+  sheet.getRange(pricingData.length + 3, 1, 1, 3).setFontWeight('bold').setBackground('#e1f5fe');
+}
+
+/**
  * Creates an enhanced wedding intake form with spreadsheet integration
  * This replaces the basic form creation with a more complete solution
  */
@@ -1760,641 +1935,230 @@ function createEnhancedWeddingIntakeForm() {
 }
 
 /**
- * Creates and configures the Wedding Contract Data spreadsheet
+ * PHASE 2: FORM-TO-SHEETS INTEGRATION & ENHANCEMENT
+ * Enhanced form creation with automatic spreadsheet connection
+ */
+
+/**
+ * Creates a comprehensive spreadsheet for wedding contract management
+ * This spreadsheet will store form responses and contract tracking data
  */
 function createWeddingContractSpreadsheet() {
-  const spreadsheet = SpreadsheetApp.create('Wedding Contract Data');
-  
-  // Get the default sheet and rename it
-  const responseSheet = spreadsheet.getActiveSheet();
-  responseSheet.setName('Form Responses');
-  
-  // Create additional sheets for different data types
-  const contractsSheet = spreadsheet.insertSheet('Generated Contracts');
-  const pricingSheet = spreadsheet.insertSheet('Pricing Calculations');
-  const statusSheet = spreadsheet.insertSheet('Contract Status');
-  
-  // Set up the responses sheet headers (these will be auto-populated by the form)
-  setupResponseSheetHeaders(responseSheet);
-  
-  // Set up the contracts tracking sheet
-  setupContractsTrackingSheet(contractsSheet);
-  
-  // Set up pricing calculations sheet
-  setupPricingCalculationsSheet(pricingSheet);
-  
-  // Set up status tracking sheet
-  setupStatusTrackingSheet(statusSheet);
-  
-  return spreadsheet;
+  try {
+    // Create a new spreadsheet
+    const spreadsheet = SpreadsheetApp.create('Wedding Services Contract Management');
+    
+    // Set up the main responses sheet (this will be automatically linked to the form)
+    const responsesSheet = spreadsheet.getSheets()[0];
+    responsesSheet.setName('Form Responses');
+    
+    // Create contract tracking sheet
+    const contractsSheet = spreadsheet.insertSheet('Contract Tracking');
+    setupContractTrackingSheet(contractsSheet);
+    
+    // Create status tracking sheet
+    const statusSheet = spreadsheet.insertSheet('Status Tracking');
+    setupStatusTrackingSheet(statusSheet);
+    
+    // Create pricing calculator sheet
+    const pricingSheet = spreadsheet.insertSheet('Pricing Calculator');
+    setupPricingCalculatorSheet(pricingSheet);
+    
+    console.log(`Wedding contract spreadsheet created: ${spreadsheet.getName()}`);
+    return spreadsheet;
+    
+  } catch (error) {
+    console.error('Error creating wedding contract spreadsheet:', error);
+    throw error;
+  }
 }
 
 /**
- * Sets up headers for the form responses sheet
+ * Sets up the contract tracking sheet with proper headers and formatting
  */
-function setupResponseSheetHeaders(sheet) {
-  // The form will automatically add headers, but we can set up formatting
-  sheet.getRange('1:1').setFontWeight('bold');
-  sheet.getRange('1:1').setBackground('#e8f4f8');
-  sheet.setFrozenRows(1);
-}
-
-/**
- * Sets up the contracts tracking sheet
- */
-function setupContractsTrackingSheet(sheet) {
+function setupContractTrackingSheet(sheet) {
+  // Set up headers
   const headers = [
     'Contract ID',
-    'Client Names',
-    'Wedding Date',
+    'Client Names', 
     'Email',
     'Phone',
-    'Total Amount',
+    'Wedding Date',
+    'Services Requested',
+    'Venue',
+    'Guest Count',
+    'Budget Range',
+    'Estimated Total',
     'Contract Status',
-    'Generated Date',
-    'Document Link',
+    'Date Created',
+    'Date Modified',
     'Notes'
   ];
   
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  sheet.getRange('1:1').setFontWeight('bold');
-  sheet.getRange('1:1').setBackground('#d4e6f1');
-  sheet.setFrozenRows(1);
   
-  // Set column widths
+  // Format the header row
+  const headerRange = sheet.getRange(1, 1, 1, headers.length);
+  headerRange.setFontWeight('bold');
+  headerRange.setBackground('#4285f4');
+  headerRange.setFontColor('#ffffff');
+  
+  // Set column widths for better readability
   sheet.setColumnWidth(1, 120); // Contract ID
-  sheet.setColumnWidth(2, 200); // Client Names  
-  sheet.setColumnWidth(3, 120); // Wedding Date
-  sheet.setColumnWidth(4, 200); // Email
-  sheet.setColumnWidth(5, 130); // Phone
-  sheet.setColumnWidth(6, 120); // Total Amount
-  sheet.setColumnWidth(7, 150); // Status
-  sheet.setColumnWidth(8, 130); // Generated Date
-  sheet.setColumnWidth(9, 200); // Document Link
-  sheet.setColumnWidth(10, 300); // Notes
-}
-
-/**
- * Sets up the pricing calculations sheet
- */
-function setupPricingCalculationsSheet(sheet) {
-  const headers = [
-    'Service Type',
-    'Base Price',
-    'Per Hour Rate',
-    'Equipment Fee',
-    'Travel Fee',
-    'Additional Costs',
-    'Total Price',
-    'Last Updated'
-  ];
+  sheet.setColumnWidth(2, 200); // Client Names
+  sheet.setColumnWidth(3, 200); // Email
+  sheet.setColumnWidth(4, 120); // Phone
+  sheet.setColumnWidth(5, 120); // Wedding Date
+  sheet.setColumnWidth(6, 250); // Services
+  sheet.setColumnWidth(7, 200); // Venue
+  sheet.setColumnWidth(8, 100); // Guest Count
+  sheet.setColumnWidth(9, 120); // Budget Range
+  sheet.setColumnWidth(10, 120); // Estimated Total
+  sheet.setColumnWidth(11, 150); // Contract Status
+  sheet.setColumnWidth(12, 120); // Date Created
+  sheet.setColumnWidth(13, 120); // Date Modified
+  sheet.setColumnWidth(14, 300); // Notes
   
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  sheet.getRange('1:1').setFontWeight('bold');
-  sheet.getRange('1:1').setBackground('#d5e8d4');
+  // Freeze the header row
   sheet.setFrozenRows(1);
-  
-  // Add sample pricing data
-  const sampleData = [
-    ['Wedding Photography', 1500, 250, 200, 100, 0, '=B2+C2*8+D2+E2+F2', new Date()],
-    ['Wedding Videography', 2000, 300, 500, 100, 0, '=B3+C3*8+D3+E3+F3', new Date()],
-    ['DJ Services', 800, 150, 300, 75, 0, '=B4+C4*6+D4+E4+F4', new Date()],
-    ['Photography + Video', 3200, 275, 600, 150, 0, '=B5+C5*10+D5+E5+F5', new Date()],
-    ['Full Event Coverage', 4500, 325, 800, 200, 500, '=B6+C6*12+D6+E6+F6', new Date()]
-  ];
-  
-  sheet.getRange(2, 1, sampleData.length, sampleData[0].length).setValues(sampleData);
-  
-  // Format pricing columns as currency
-  sheet.getRange('B:G').setNumberFormat('$#,##0.00');
 }
 
 /**
- * Sets up the status tracking sheet
+ * Sets up the status tracking sheet for workflow management
  */
 function setupStatusTrackingSheet(sheet) {
   const headers = [
     'Contract ID',
-    'Client Names', 
+    'Client Names',
+    'Wedding Date',
     'Form Submitted',
-    'Contract Generated',
-    'Client Reviewed',
-    'Signed',
-    'Payment Received',
+    'Initial Contact Made', 
+    'Quote Provided',
+    'Contract Sent',
+    'Contract Signed',
+    'Deposit Received',
+    'Final Payment Received',
     'Services Completed',
     'Current Status',
     'Next Action',
-    'Due Date'
+    'Due Date',
+    'Assigned To',
+    'Priority'
   ];
   
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  sheet.getRange('1:1').setFontWeight('bold');
-  sheet.getRange('1:1').setBackground('#f9e79f');
-  sheet.setFrozenRows(1);
+  
+  // Format the header row
+  const headerRange = sheet.getRange(1, 1, 1, headers.length);
+  headerRange.setFontWeight('bold');
+  headerRange.setBackground('#34a853');
+  headerRange.setFontColor('#ffffff');
   
   // Set column widths
   sheet.setColumnWidth(1, 120);
   sheet.setColumnWidth(2, 200);
-  sheet.setColumnWidths(3, 6, 120); // Status columns
-  sheet.setColumnWidth(9, 150);
-  sheet.setColumnWidth(10, 200);
-  sheet.setColumnWidth(11, 120);
-}
-
-/**
- * Adds client information section to the form
- */
-function addClientInformationSection(form) {
-  form.addSectionHeaderItem()
-    .setTitle('Client Information')
-    .setHelpText('Please provide your contact information and basic details.');
-  
-  form.addTextItem()
-    .setTitle('Primary Contact Name')
-    .setHelpText('Full name of the main contact person')
-    .setRequired(true);
-  
-  form.addTextItem()
-    .setTitle('Partner/Spouse Name')
-    .setHelpText('Full name of your partner/spouse')
-    .setRequired(false);
-  
-  form.addTextItem()
-    .setTitle('Email Address')
-    .setHelpText('Primary email for all communications')
-    .setRequired(true);
-  
-  form.addTextItem()
-    .setTitle('Phone Number')
-    .setHelpText('Best phone number to reach you')
-    .setRequired(true);
-  
-  form.addTextItem()
-    .setTitle('Mailing Address')
-    .setHelpText('Complete mailing address for contracts and correspondence')
-    .setRequired(true);
-}
-
-/**
- * Adds event details section to the form
- */
-function addEventDetailsSection(form) {
-  form.addSectionHeaderItem()
-    .setTitle('Wedding Event Details')
-    .setHelpText('Tell us about your special day!');
-  
-  form.addDateItem()
-    .setTitle('Wedding Date')
-    .setHelpText('The date of your wedding ceremony')
-    .setRequired(true);
-  
-  form.addTimeItem()
-    .setTitle('Ceremony Start Time')
-    .setHelpText('What time does the ceremony begin?')
-    .setRequired(true);
-  
-  form.addTimeItem()
-    .setTitle('Reception Start Time')
-    .setHelpText('What time does the reception begin?')
-    .setRequired(false);
-  
-  form.addTextItem()
-    .setTitle('Expected Number of Guests')
-    .setHelpText('Approximate number of guests attending')
-    .setRequired(true);
-  
-  form.addMultipleChoiceItem()
-    .setTitle('Event Type')
-    .setChoiceValues([
-      'Traditional Wedding',
-      'Destination Wedding', 
-      'Elopement',
-      'Reception Only',
-      'Engagement Party',
-      'Other'
-    ])
-    .setRequired(true);
-}
-
-/**
- * Adds service selection section with conditional logic
- */
-function addServiceSelectionSection(form) {
-  form.addSectionHeaderItem()
-    .setTitle('Services Requested')
-    .setHelpText('Select all services you would like us to provide.');
-  
-  // Main services checkboxes
-  const servicesItem = form.addCheckboxItem()
-    .setTitle('Which services do you need?')
-    .setChoiceValues([
-      'Wedding Photography',
-      'Wedding Videography', 
-      'DJ/Music Services',
-      'Lighting Setup',
-      'Audio/Sound System',
-      'Photo Booth',
-      'Live Streaming',
-      'Drone Photography/Video',
-      'Additional Photographer',
-      'Rush Delivery'
-    ])
-    .setRequired(true);
-  
-  // Photography details (conditional)
-  form.addMultipleChoiceItem()
-    .setTitle('Photography Package')
-    .setChoiceValues([
-      'Basic Package (4 hours)',
-      'Standard Package (6 hours)', 
-      'Premium Package (8 hours)',
-      'Full Day Coverage (10+ hours)',
-      'Custom Package'
-    ])
-    .setRequired(false);
-  
-  // Videography details (conditional)
-  form.addMultipleChoiceItem()
-    .setTitle('Videography Package')
-    .setChoiceValues([
-      'Highlight Reel (3-5 minutes)',
-      'Ceremony + Reception (30-45 minutes)',
-      'Full Event Documentation',
-      'Live Stream + Recording',
-      'Drone Video Add-on'
-    ])
-    .setRequired(false);
-  
-  // DJ Services details (conditional)
-  form.addMultipleChoiceItem()
-    .setTitle('DJ/Music Services')
-    .setChoiceValues([
-      'Ceremony Music Only',
-      'Reception Only',
-      'Full Event DJ Services',
-      'Live Band Coordination',
-      'Special Equipment Needs'
-    ])
-    .setRequired(false);
-}
-
-/**
- * Adds venue and timing section
- */
-function addVenueAndTimingSection(form) {
-  form.addSectionHeaderItem()
-    .setTitle('Venue & Timing Information')
-    .setHelpText('Help us prepare for your venue and timeline.');
-  
-  form.addTextItem()
-    .setTitle('Ceremony Venue Name')
-    .setHelpText('Name of the ceremony location')
-    .setRequired(true);
-  
-  form.addTextItem()
-    .setTitle('Ceremony Venue Address')
-    .setHelpText('Full address of ceremony location')
-    .setRequired(true);
-  
-  form.addTextItem()
-    .setTitle('Reception Venue Name')
-    .setHelpText('Name of the reception location (if different)')
-    .setRequired(false);
-  
-  form.addTextItem()
-    .setTitle('Reception Venue Address')
-    .setHelpText('Full address of reception location (if different)')
-    .setRequired(false);
-  
-  form.addMultipleChoiceItem()
-    .setTitle('Venue Type')
-    .setChoiceValues([
-      'Indoor - Traditional',
-      'Indoor - Modern/Industrial',
-      'Outdoor - Garden/Park',
-      'Outdoor - Beach',
-      'Outdoor - Mountain/Rural',
-      'Mixed Indoor/Outdoor',
-      'Religious Facility',
-      'Private Residence',
-      'Other'
-    ])
-    .setRequired(true);
-  
-  form.addTextItem()
-    .setTitle('Special Venue Considerations')
-    .setHelpText('Any restrictions, equipment limitations, or special requirements?')
-    .setRequired(false);
-}
-
-/**
- * Adds budget and preferences section
- */
-function addBudgetAndPreferencesSection(form) {
-  form.addSectionHeaderItem()
-    .setTitle('Budget & Preferences')
-    .setHelpText('Help us create the perfect package for you.');
-  
-  form.addMultipleChoiceItem()
-    .setTitle('Total Budget Range for Our Services')
-    .setChoiceValues([
-      'Under $2,000',
-      '$2,000 - $3,500',
-      '$3,500 - $5,000', 
-      '$5,000 - $7,500',
-      '$7,500 - $10,000',
-      'Over $10,000',
-      'Please contact me to discuss'
-    ])
-    .setRequired(true);
-  
-  form.addMultipleChoiceItem()
-    .setTitle('Photography Style Preference')
-    .setChoiceValues([
-      'Traditional/Classic',
-      'Photojournalistic/Candid',
-      'Artistic/Creative',
-      'Modern/Contemporary',
-      'Vintage/Retro',
-      'Mix of styles'
-    ])
-    .setRequired(false);
-  
-  form.addMultipleChoiceItem()
-    .setTitle('Music/DJ Style Preference')
-    .setChoiceValues([
-      'Top 40/Contemporary',
-      'Classic Rock',
-      'R&B/Hip-Hop',
-      'Country',
-      'Electronic/Dance',
-      'Jazz/Swing',
-      'Cultural/Traditional',
-      'Mix of genres'
-    ])
-    .setRequired(false);
-  
-  form.addParagraphTextItem()
-    .setTitle('Special Requests or Requirements')
-    .setHelpText('Any specific songs, photos, moments, or special accommodations we should know about?')
-    .setRequired(false);
-}
-
-/**
- * Adds additional details section
- */
-function addAdditionalDetailsSection(form) {
-  form.addSectionHeaderItem()
-    .setTitle('Additional Information')
-    .setHelpText('Final details to help us serve you better.');
-  
-  form.addMultipleChoiceItem()
-    .setTitle('How did you hear about us?')
-    .setChoiceValues([
-      'Google Search',
-      'Social Media (Instagram/Facebook)',
-      'Wedding Website/Blog',
-      'Referral from friend/family',
-      'Venue recommendation',
-      'Wedding planner recommendation',
-      'Previous client',
-      'Other'
-    ])
-    .setRequired(false);
-  
-  form.addMultipleChoiceItem()
-    .setTitle('Preferred Communication Method')
-    .setChoiceValues([
-      'Email',
-      'Phone calls',
-      'Text messages',
-      'Video calls',
-      'In-person meetings'
-    ])
-    .setRequired(true);
-  
-  form.addMultipleChoiceItem()
-    .setTitle('When would you like to finalize the contract?')
-    .setChoiceValues([
-      'Within 1 week',
-      'Within 2 weeks', 
-      'Within 1 month',
-      'Within 2 months',
-      'I need more time to decide'
-    ])
-    .setRequired(true);
-  
-  form.addParagraphTextItem()
-    .setTitle('Additional Comments or Questions')
-    .setHelpText('Anything else you would like us to know?')
-    .setRequired(false);
-}
-
-/**
- * Sets up form submission trigger for automated processing
- */
-function setupFormSubmissionTrigger(form, spreadsheet) {
-  try {
-    // Create a trigger that fires when the form is submitted
-    ScriptApp.newTrigger('onEnhancedFormSubmit')
-      .forForm(form)
-      .onFormSubmit()
-      .create();
-    
-    console.log('Form submission trigger created successfully');
-    
-  } catch (error) {
-    console.error('Error setting up form submission trigger:', error);
+  sheet.setColumnWidth(3, 120);
+  for (let i = 4; i <= 11; i++) {
+    sheet.setColumnWidth(i, 120);
   }
+  sheet.setColumnWidth(12, 150);
+  sheet.setColumnWidth(13, 200);
+  sheet.setColumnWidth(14, 120);
+  sheet.setColumnWidth(15, 120);
+  sheet.setColumnWidth(16, 100);
+  
+  sheet.setFrozenRows(1);
 }
 
 /**
- * Handles enhanced form submissions with automatic processing
+ * Sets up the pricing calculator sheet with service rates and formulas
  */
-function onEnhancedFormSubmit(e) {
-  try {
-    console.log('Processing enhanced form submission...');
-    
-    const response = e.response;
-    const form = FormApp.openById(response.getEditResponseUrl().split('/')[5]);
-    const spreadsheet = SpreadsheetApp.openById(form.getDestinationId());
-    
-    // Process the form response
-    const processedData = processFormResponse(response);
-    
-    // Update the contracts tracking sheet
-    updateContractsTracking(spreadsheet, processedData);
-    
-    // Update status tracking
-    updateStatusTracking(spreadsheet, processedData);
-    
-    // Send confirmation email
-    sendClientConfirmationEmail(processedData);
-    
-    console.log(`Processed form submission for: ${processedData.clientNames}`);
-    
-  } catch (error) {
-    console.error('Error processing enhanced form submission:', error);
-  }
-}
-
-/**
- * Processes form response data into structured format
- */
-function processFormResponse(response) {
-  const itemResponses = response.getItemResponses();
-  const formData = {};
-  
-  // Extract data from form responses
-  itemResponses.forEach(function(itemResponse) {
-    const title = itemResponse.getItem().getTitle();
-    const answer = itemResponse.getResponse();
-    formData[title] = answer;
-  });
-  
-  // Generate contract ID
-  const contractId = generateContractId(formData);
-  
-  // Calculate estimated pricing
-  const estimatedTotal = calculateEstimatedPricing(formData);
-  
-  return {
-    contractId: contractId,
-    clientNames: `${formData['Primary Contact Name']} & ${formData['Partner/Spouse Name'] || 'Partner'}`,
-    weddingDate: formData['Wedding Date'],
-    email: formData['Email Address'],
-    phone: formData['Phone Number'],
-    services: formData['Which services do you need?'],
-    estimatedTotal: estimatedTotal,
-    submissionDate: new Date(),
-    formData: formData
-  };
-}
-
-/**
- * Generates a unique contract ID
- */
-function generateContractId(formData) {
-  const date = new Date(formData['Wedding Date']);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  
-  return `WED${year}${month}${randomNum}`;
-}
-
-/**
- * Calculates estimated pricing based on selected services
- */
-function calculateEstimatedPricing(formData) {
-  let total = 0;
-  const services = formData['Which services do you need?'] || [];
-  
-  // Base pricing lookup
-  const servicePricing = {
-    'Wedding Photography': 1500,
-    'Wedding Videography': 2000,
-    'DJ/Music Services': 800,
-    'Lighting Setup': 400,
-    'Audio/Sound System': 300,
-    'Photo Booth': 600,
-    'Live Streaming': 500,
-    'Drone Photography/Video': 400,
-    'Additional Photographer': 800,
-    'Rush Delivery': 200
-  };
-  
-  // Calculate total
-  if (Array.isArray(services)) {
-    services.forEach(function(service) {
-      total += servicePricing[service] || 0;
-    });
-  }
-  
-  return total;
-}
-
-/**
- * Updates the contracts tracking sheet
- */
-function updateContractsTracking(spreadsheet, processedData) {
-  const sheet = spreadsheet.getSheetByName('Generated Contracts');
-  
-  const newRow = [
-    processedData.contractId,
-    processedData.clientNames,
-    processedData.weddingDate,
-    processedData.email,
-    processedData.phone,
-    processedData.estimatedTotal,
-    'Form Submitted',
-    processedData.submissionDate,
-    '', // Document link - will be filled when contract is generated
-    'New submission - pending contract generation'
+function setupPricingCalculatorSheet(sheet) {
+  // Service pricing table
+  const pricingData = [
+    ['Service', 'Base Rate', 'Per Hour Rate', 'Notes'],
+    ['Wedding Photography', 1500, 200, 'Basic package includes 4 hours'],
+    ['Wedding Videography', 2000, 250, 'Includes editing and highlights'],
+    ['DJ/Music Services', 800, 100, 'Includes basic sound system'],
+    ['Lighting Setup', 400, 50, 'Ambient and dance lighting'],
+    ['Audio/Sound System', 300, 40, 'Ceremony and reception'],
+    ['Photo Booth', 600, 75, 'Props and prints included'],
+    ['Live Streaming', 500, 60, 'Professional streaming setup'],
+    ['Drone Photography/Video', 400, 80, 'Weather dependent'],
+    ['Additional Photographer', 300, 60, 'Second shooter'],
+    ['Rush Delivery', 200, 0, 'Expedited editing/delivery']
   ];
   
-  sheet.appendRow(newRow);
+  sheet.getRange(1, 1, pricingData.length, pricingData[0].length).setValues(pricingData);
+  
+  // Format the pricing table
+  const headerRange = sheet.getRange(1, 1, 1, 4);
+  headerRange.setFontWeight('bold');
+  headerRange.setBackground('#ff9900');
+  headerRange.setFontColor('#ffffff');
+  
+  // Set column widths
+  sheet.setColumnWidth(1, 200);
+  sheet.setColumnWidth(2, 120);
+  sheet.setColumnWidth(3, 120);
+  sheet.setColumnWidth(4, 300);
+  
+  sheet.setFrozenRows(1);
+  
+  // Add calculation formulas section
+  sheet.getRange(pricingData.length + 2, 1).setValue('Package Calculator');
+  sheet.getRange(pricingData.length + 2, 1).setFontWeight('bold').setFontSize(14);
+  
+  const calculatorHeaders = ['Selected Service', 'Hours', 'Calculated Cost'];
+  sheet.getRange(pricingData.length + 3, 1, 1, 3).setValues([calculatorHeaders]);
+  sheet.getRange(pricingData.length + 3, 1, 1, 3).setFontWeight('bold').setBackground('#e1f5fe');
 }
 
 /**
- * Updates the status tracking sheet
+ * Creates an enhanced wedding intake form with spreadsheet integration
+ * This replaces the basic form creation with a more complete solution
  */
-function updateStatusTracking(spreadsheet, processedData) {
-  const sheet = spreadsheet.getSheetByName('Contract Status');
-  
-  const newRow = [
-    processedData.contractId,
-    processedData.clientNames,
-    new Date(), // Form submitted
-    '', // Contract generated
-    '', // Client reviewed
-    '', // Signed
-    '', // Payment received
-    '', // Services completed
-    'Form Submitted',
-    'Generate Contract',
-    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // Due date: 1 week from now
-  ];
-  
-  sheet.appendRow(newRow);
-}
-
-/**
- * Sends confirmation email to client
- */
-function sendClientConfirmationEmail(processedData) {
+function createEnhancedWeddingIntakeForm() {
   try {
-    const subject = `Wedding Services Application Received - Contract ID: ${processedData.contractId}`;
+    console.log('Creating enhanced wedding intake form with spreadsheet integration...');
     
-    const body = `
-Dear ${processedData.clientNames},
-
-Thank you for submitting your wedding services application! We're excited to potentially be part of your special day.
-
-Contract Details:
-- Contract ID: ${processedData.contractId}
-- Wedding Date: ${processedData.weddingDate}
-- Estimated Total: $${processedData.estimatedTotal.toLocaleString()}
-
-Next Steps:
-1. We will review your requirements and prepare a detailed contract
-2. You will receive the contract within 2-3 business days
-3. We'll schedule a consultation call to discuss any questions
-
-We look forward to working with you!
-
-Best regards,
-Allwave Services Team
-
----
-This is an automated confirmation. Please save this email for your records.
-Contract ID: ${processedData.contractId}
-    `;
+    // Create or get the spreadsheet for contract data
+    const spreadsheet = createWeddingContractSpreadsheet();
+    const spreadsheetId = spreadsheet.getId();
     
-    MailApp.sendEmail(processedData.email, subject, body);
-    console.log(`Confirmation email sent to: ${processedData.email}`);
+    console.log(`Created spreadsheet: ${spreadsheet.getName()} (${spreadsheetId})`);
+    
+    // Create the form and connect it to the spreadsheet
+    const form = FormApp.create('Wedding Services Intake Form - Enhanced')
+      .setDescription('Complete this form to provide details for your wedding services contract.')
+      .setCollectEmail(true)
+      .setDestination(FormApp.DestinationType.SPREADSHEET, spreadsheetId)
+      .setLimitOneResponsePerUser(false)
+      .setAllowResponseEdits(true);
+    
+    // Add form sections with conditional logic
+    addClientInformationSection(form);
+    addEventDetailsSection(form);
+    addServiceSelectionSection(form);
+    addVenueAndTimingSection(form);
+    addBudgetAndPreferencesSection(form);
+    addAdditionalDetailsSection(form);
+    
+    console.log(`Enhanced form created: ${form.getEditUrl()}`);
+    console.log(`Form responses will be collected in: ${spreadsheet.getUrl()}`);
+    
+    // Set up form submission trigger
+    setupFormSubmissionTrigger(form, spreadsheet);
+    
+    return {
+      form: form,
+      spreadsheet: spreadsheet,
+      formUrl: form.getEditUrl(),
+      spreadsheetUrl: spreadsheet.getUrl()
+    };
     
   } catch (error) {
-    console.error('Error sending confirmation email:', error);
+    console.error('Error creating enhanced form:', error);
+    throw error;
   }
 }
