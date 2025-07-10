@@ -1409,46 +1409,68 @@ function runSystemTests() {
  * Tests the form creation functionality
  */
 function testFormCreationFunctions() {
+  let testForm, testSpreadsheet;
   try {
-    console.log('Testing form creation functions...');
+    console.log('Testing Phase 2 form creation functions...');
     
-    // Check if main form creation function exists and is callable
-    if (typeof createWeddingIntakeForm !== 'function') {
-      throw new Error('createWeddingIntakeForm function not found');
+    // 1. Test the enhanced form and spreadsheet creation
+    const result = createEnhancedWeddingIntakeForm();
+    testForm = result.form;
+    testSpreadsheet = result.spreadsheet;
+
+    if (!testForm || !testSpreadsheet) {
+      throw new Error('createEnhancedWeddingIntakeForm did not return a form and spreadsheet.');
     }
-    
-    // Check if helper functions exist
-    const requiredFunctions = [
-      'addItemToForm',
-      'addQuestionItem', 
-      'addChoiceQuestion',
-      'addTextValidation'
-    ];
-    
-    for (const funcName of requiredFunctions) {
-      if (typeof eval(funcName) !== 'function') {
-        throw new Error(`${funcName} function not found`);
+    console.log('✓ Form and spreadsheet created successfully.');
+
+    // 2. Verify the form is linked to the spreadsheet
+    const destinationId = testForm.getDestinationId();
+    if (destinationId !== testSpreadsheet.getId()) {
+      throw new Error('Form is not linked to the correct spreadsheet.');
+    }
+    console.log('✓ Form is correctly linked to the spreadsheet.');
+
+    // 3. Verify the spreadsheet has the required sheets
+    const sheetNames = testSpreadsheet.getSheets().map(s => s.getName());
+    const requiredSheets = ['Form Responses', 'Contract Tracking', 'Status Tracking', 'Pricing Calculator'];
+    for (const sheetName of requiredSheets) {
+      if (!sheetNames.includes(sheetName)) {
+        throw new Error(`Spreadsheet is missing the "${sheetName}" sheet.`);
       }
     }
-    
-    console.log('✓ All form creation functions are defined');
-    
-    // Test form configuration structure
-    const testConfig = {
-      info: { title: 'Test Form', description: 'Test' },
-      settings: { collectEmail: true },
-      items: [
-        { title: 'Test', questionItem: { question: { required: true, textQuestion: {} } } }
-      ]
-    };
-    
+    console.log('✓ Spreadsheet contains all required sheets.');
+
     console.log('✓ Form creation functions test passed');
-    
-    return { passed: true, message: 'Form creation functions working correctly' };
+    return { passed: true, message: 'Enhanced form creation and spreadsheet setup working correctly.' };
     
   } catch (error) {
     console.error('Form creation test failed:', error);
     return { passed: false, error: error.message };
+  } finally {
+    // 4. Clean up created test files
+    cleanupTestFiles(testForm, testSpreadsheet);
+  }
+}
+
+/**
+ * Helper function to delete test files to avoid clutter.
+ * @param {GoogleAppsScript.Forms.Form} form - The form to delete.
+ * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} spreadsheet - The spreadsheet to delete.
+ */
+function cleanupTestFiles(form, spreadsheet) {
+  try {
+    if (form) {
+      const formId = form.getId();
+      DriveApp.getFileById(formId).setTrashed(true);
+      console.log(`✓ Test form (ID: ${formId}) deleted.`);
+    }
+    if (spreadsheet) {
+      const spreadsheetId = spreadsheet.getId();
+      DriveApp.getFileById(spreadsheetId).setTrashed(true);
+      console.log(`✓ Test spreadsheet (ID: ${spreadsheetId}) deleted.`);
+    }
+  } catch (e) {
+    console.error(`Cleanup failed. Manual cleanup may be required. Error: ${e.message}`);
   }
 }
 
@@ -1648,14 +1670,19 @@ function runSmokeTest() {
     
     // Test that all main functions are defined
     const criticalFunctions = [
-      'createWeddingIntakeForm',
+      'createWeddingIntakeForm', // Phase 1
       'onOpen', 
       'generateSingleContract',
-      'formatFieldValue'
+      'formatFieldValue',
+      'createEnhancedWeddingIntakeForm', // Phase 2
+      'createWeddingContractSpreadsheet', // Phase 2
+      'onEnhancedFormSubmit', // Phase 2
+      'processFormResponse', // Phase 2
+      'calculateEstimatedPricing' // Phase 2
     ];
     
     for (const funcName of criticalFunctions) {
-      if (typeof eval(funcName) !== 'function') {
+      if (typeof this[funcName] !== 'function') { // Use this[funcName] for global scope
         throw new Error(`Critical function ${funcName} not found`);
       }
     }
@@ -1702,235 +1729,6 @@ function runSmokeTest() {
     }
     
     return false;
-  }
-}
-
-/**
- * PHASE 2: FORM-TO-SHEETS INTEGRATION & ENHANCEMENT
- * Enhanced form creation with automatic spreadsheet connection
- */
-
-/**
- * Creates a comprehensive spreadsheet for wedding contract management
- * This spreadsheet will store form responses and contract tracking data
- */
-function createWeddingContractSpreadsheet() {
-  try {
-    // Create a new spreadsheet
-    const spreadsheet = SpreadsheetApp.create('Wedding Services Contract Management');
-    
-    // Set up the main responses sheet (this will be automatically linked to the form)
-    const responsesSheet = spreadsheet.getSheets()[0];
-    responsesSheet.setName('Form Responses');
-    
-    // Create contract tracking sheet
-    const contractsSheet = spreadsheet.insertSheet('Contract Tracking');
-    setupContractTrackingSheet(contractsSheet);
-    
-    // Create status tracking sheet
-    const statusSheet = spreadsheet.insertSheet('Status Tracking');
-    setupStatusTrackingSheet(statusSheet);
-    
-    // Create pricing calculator sheet
-    const pricingSheet = spreadsheet.insertSheet('Pricing Calculator');
-    setupPricingCalculatorSheet(pricingSheet);
-    
-    console.log(`Wedding contract spreadsheet created: ${spreadsheet.getName()}`);
-    return spreadsheet;
-    
-  } catch (error) {
-    console.error('Error creating wedding contract spreadsheet:', error);
-    throw error;
-  }
-}
-
-/**
- * Sets up the contract tracking sheet with proper headers and formatting
- */
-function setupContractTrackingSheet(sheet) {
-  // Set up headers
-  const headers = [
-    'Contract ID',
-    'Client Names', 
-    'Email',
-    'Phone',
-    'Wedding Date',
-    'Services Requested',
-    'Venue',
-    'Guest Count',
-    'Budget Range',
-    'Estimated Total',
-    'Contract Status',
-    'Date Created',
-    'Date Modified',
-    'Notes'
-  ];
-  
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  
-  // Format the header row
-  const headerRange = sheet.getRange(1, 1, 1, headers.length);
-  headerRange.setFontWeight('bold');
-  headerRange.setBackground('#4285f4');
-  headerRange.setFontColor('#ffffff');
-  
-  // Set column widths for better readability
-  sheet.setColumnWidth(1, 120); // Contract ID
-  sheet.setColumnWidth(2, 200); // Client Names
-  sheet.setColumnWidth(3, 200); // Email
-  sheet.setColumnWidth(4, 120); // Phone
-  sheet.setColumnWidth(5, 120); // Wedding Date
-  sheet.setColumnWidth(6, 250); // Services
-  sheet.setColumnWidth(7, 200); // Venue
-  sheet.setColumnWidth(8, 100); // Guest Count
-  sheet.setColumnWidth(9, 120); // Budget Range
-  sheet.setColumnWidth(10, 120); // Estimated Total
-  sheet.setColumnWidth(11, 150); // Contract Status
-  sheet.setColumnWidth(12, 120); // Date Created
-  sheet.setColumnWidth(13, 120); // Date Modified
-  sheet.setColumnWidth(14, 300); // Notes
-  
-  // Freeze the header row
-  sheet.setFrozenRows(1);
-}
-
-/**
- * Sets up the status tracking sheet for workflow management
- */
-function setupStatusTrackingSheet(sheet) {
-  const headers = [
-    'Contract ID',
-    'Client Names',
-    'Wedding Date',
-    'Form Submitted',
-    'Initial Contact Made', 
-    'Quote Provided',
-    'Contract Sent',
-    'Contract Signed',
-    'Deposit Received',
-    'Final Payment Received',
-    'Services Completed',
-    'Current Status',
-    'Next Action',
-    'Due Date',
-    'Assigned To',
-    'Priority'
-  ];
-  
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  
-  // Format the header row
-  const headerRange = sheet.getRange(1, 1, 1, headers.length);
-  headerRange.setFontWeight('bold');
-  headerRange.setBackground('#34a853');
-  headerRange.setFontColor('#ffffff');
-  
-  // Set column widths
-  sheet.setColumnWidth(1, 120);
-  sheet.setColumnWidth(2, 200);
-  sheet.setColumnWidth(3, 120);
-  for (let i = 4; i <= 11; i++) {
-    sheet.setColumnWidth(i, 120);
-  }
-  sheet.setColumnWidth(12, 150);
-  sheet.setColumnWidth(13, 200);
-  sheet.setColumnWidth(14, 120);
-  sheet.setColumnWidth(15, 120);
-  sheet.setColumnWidth(16, 100);
-  
-  sheet.setFrozenRows(1);
-}
-
-/**
- * Sets up the pricing calculator sheet with service rates and formulas
- */
-function setupPricingCalculatorSheet(sheet) {
-  // Service pricing table
-  const pricingData = [
-    ['Service', 'Base Rate', 'Per Hour Rate', 'Notes'],
-    ['Wedding Photography', 1500, 200, 'Basic package includes 4 hours'],
-    ['Wedding Videography', 2000, 250, 'Includes editing and highlights'],
-    ['DJ/Music Services', 800, 100, 'Includes basic sound system'],
-    ['Lighting Setup', 400, 50, 'Ambient and dance lighting'],
-    ['Audio/Sound System', 300, 40, 'Ceremony and reception'],
-    ['Photo Booth', 600, 75, 'Props and prints included'],
-    ['Live Streaming', 500, 60, 'Professional streaming setup'],
-    ['Drone Photography/Video', 400, 80, 'Weather dependent'],
-    ['Additional Photographer', 300, 60, 'Second shooter'],
-    ['Rush Delivery', 200, 0, 'Expedited editing/delivery']
-  ];
-  
-  sheet.getRange(1, 1, pricingData.length, pricingData[0].length).setValues(pricingData);
-  
-  // Format the pricing table
-  const headerRange = sheet.getRange(1, 1, 1, 4);
-  headerRange.setFontWeight('bold');
-  headerRange.setBackground('#ff9900');
-  headerRange.setFontColor('#ffffff');
-  
-  // Set column widths
-  sheet.setColumnWidth(1, 200);
-  sheet.setColumnWidth(2, 120);
-  sheet.setColumnWidth(3, 120);
-  sheet.setColumnWidth(4, 300);
-  
-  sheet.setFrozenRows(1);
-  
-  // Add calculation formulas section
-  sheet.getRange(pricingData.length + 2, 1).setValue('Package Calculator');
-  sheet.getRange(pricingData.length + 2, 1).setFontWeight('bold').setFontSize(14);
-  
-  const calculatorHeaders = ['Selected Service', 'Hours', 'Calculated Cost'];
-  sheet.getRange(pricingData.length + 3, 1, 1, 3).setValues([calculatorHeaders]);
-  sheet.getRange(pricingData.length + 3, 1, 1, 3).setFontWeight('bold').setBackground('#e1f5fe');
-}
-
-/**
- * Creates an enhanced wedding intake form with spreadsheet integration
- * This replaces the basic form creation with a more complete solution
- */
-function createEnhancedWeddingIntakeForm() {
-  try {
-    console.log('Creating enhanced wedding intake form with spreadsheet integration...');
-    
-    // Create or get the spreadsheet for contract data
-    const spreadsheet = createWeddingContractSpreadsheet();
-    const spreadsheetId = spreadsheet.getId();
-    
-    console.log(`Created spreadsheet: ${spreadsheet.getName()} (${spreadsheetId})`);
-    
-    // Create the form and connect it to the spreadsheet
-    const form = FormApp.create('Wedding Services Intake Form - Enhanced')
-      .setDescription('Complete this form to provide details for your wedding services contract.')
-      .setCollectEmail(true)
-      .setDestination(FormApp.DestinationType.SPREADSHEET, spreadsheetId)
-      .setLimitOneResponsePerUser(false)
-      .setAllowResponseEdits(true);
-    
-    // Add form sections with conditional logic
-    addClientInformationSection(form);
-    addEventDetailsSection(form);
-    addServiceSelectionSection(form);
-    addVenueAndTimingSection(form);
-    addBudgetAndPreferencesSection(form);
-    addAdditionalDetailsSection(form);
-    
-    console.log(`Enhanced form created: ${form.getEditUrl()}`);
-    console.log(`Form responses will be collected in: ${spreadsheet.getUrl()}`);
-    
-    // Set up form submission trigger
-    setupFormSubmissionTrigger(form, spreadsheet);
-    
-    return {
-      form: form,
-      spreadsheet: spreadsheet,
-      formUrl: form.getEditUrl(),
-      spreadsheetUrl: spreadsheet.getUrl()
-    };
-    
-  } catch (error) {
-    console.error('Error creating enhanced form:', error);
-    throw error;
   }
 }
 
