@@ -941,9 +941,103 @@ function addTextValidation(textItem, validation) {
   }
 }
 
-// ===================================================================
-// CONTRACT GENERATION AND MAIL MERGE SYSTEM
-// ===================================================================
+/**
+ * Adds client information section to the form
+ */
+function addClientInformationSection(form) {
+  form.addSectionHeaderItem()
+    .setTitle('Client Information')
+    .setHelpText('Please provide your contact information and basic details.');
+  form.addTextItem().setTitle('Primary Contact Name').setRequired(true);
+  form.addTextItem().setTitle('Partner/Spouse Name').setRequired(false);
+  form.addTextItem().setTitle('Email Address').setRequired(true);
+  form.addTextItem().setTitle('Phone Number').setRequired(true);
+  form.addTextItem().setTitle('Mailing Address').setRequired(true);
+}
+
+/**
+ * Adds event details section to the form
+ */
+function addEventDetailsSection(form) {
+  form.addSectionHeaderItem().setTitle('Wedding Event Details');
+  form.addDateItem().setTitle('Wedding Date').setRequired(true);
+  form.addTimeItem().setTitle('Ceremony Start Time').setRequired(true);
+  form.addTimeItem().setTitle('Reception Start Time').setRequired(false);
+  form.addTextItem().setTitle('Expected Number of Guests').setRequired(true);
+  form.addMultipleChoiceItem().setTitle('Event Type').setChoiceValues([
+    'Traditional Wedding','Destination Wedding','Elopement','Reception Only','Engagement Party','Other']).setRequired(true);
+}
+
+/**
+ * Adds service selection section with conditional logic
+ */
+function addServiceSelectionSection(form) {
+  form.addSectionHeaderItem().setTitle('Services Requested');
+  form.addCheckboxItem().setTitle('Which services do you need?').setChoiceValues([
+    'Wedding Photography','Wedding Videography','DJ/Music Services','Lighting Setup','Audio/Sound System','Photo Booth','Live Streaming','Drone Photography/Video','Additional Photographer','Rush Delivery']).setRequired(true);
+  form.addMultipleChoiceItem().setTitle('Photography Package').setChoiceValues([
+    'Basic Package (4 hours)','Standard Package (6 hours)','Premium Package (8 hours)','Full Day Coverage (10+ hours)','Custom Package']).setRequired(false);
+  form.addMultipleChoiceItem().setTitle('Videography Package').setChoiceValues([
+    'Highlight Reel (3-5 minutes)','Ceremony + Reception (30-45 minutes)','Full Event Documentation','Live Stream + Recording','Drone Video Add-on']).setRequired(false);
+  form.addMultipleChoiceItem().setTitle('DJ/Music Services').setChoiceValues([
+    'Ceremony Music Only','Reception Only','Full Event DJ Services','Live Band Coordination','Special Equipment Needs']).setRequired(false);
+}
+
+/**
+ * Adds venue and timing section
+ */
+function addVenueAndTimingSection(form) {
+  form.addSectionHeaderItem().setTitle('Venue & Timing Information');
+  form.addTextItem().setTitle('Ceremony Venue Name').setRequired(true);
+  form.addTextItem().setTitle('Ceremony Venue Address').setRequired(true);
+  form.addTextItem().setTitle('Reception Venue Name').setRequired(false);
+  form.addTextItem().setTitle('Reception Venue Address').setRequired(false);
+  form.addMultipleChoiceItem().setTitle('Venue Type').setChoiceValues([
+    'Indoor - Traditional','Indoor - Modern/Industrial','Outdoor - Garden/Park','Outdoor - Beach','Outdoor - Mountain/Rural','Mixed Indoor/Outdoor','Religious Facility','Private Residence','Other']).setRequired(true);
+  form.addTextItem().setTitle('Special Venue Considerations').setRequired(false);
+}
+
+/**
+ * Adds budget and preferences section
+ */
+function addBudgetAndPreferencesSection(form) {
+  form.addSectionHeaderItem().setTitle('Budget & Preferences');
+  form.addMultipleChoiceItem().setTitle('Total Budget Range for Our Services').setChoiceValues([
+    'Under $2,000','$2,000 - $3,500','$3,500 - $5,000','$5,000 - $7,500','$7,500 - $10,000','Over $10,000','Please contact me to discuss']).setRequired(true);
+  form.addMultipleChoiceItem().setTitle('Photography Style Preference').setChoiceValues([
+    'Traditional/Classic','Photojournalistic/Candid','Artistic/Creative','Modern/Contemporary','Vintage/Retro','Mix of styles']).setRequired(false);
+  form.addMultipleChoiceItem().setTitle('Music/DJ Style Preference').setChoiceValues([
+    'Top 40/Contemporary','Classic Rock','R&B/Hip-Hop','Country','Electronic/Dance','Jazz/Swing','Cultural/Traditional','Mix of genres']).setRequired(false);
+  form.addParagraphTextItem().setTitle('Special Requests or Requirements').setRequired(false);
+}
+
+/**
+ * Adds additional details section
+ */
+function addAdditionalDetailsSection(form) {
+  form.addSectionHeaderItem().setTitle('Additional Information');
+  form.addMultipleChoiceItem().setTitle('How did you hear about us?').setChoiceValues([
+    'Google Search','Social Media (Instagram/Facebook)','Wedding Website/Blog','Referral from friend/family','Venue recommendation','Wedding planner recommendation','Previous client','Other']).setRequired(false);
+  form.addMultipleChoiceItem().setTitle('Preferred Communication Method').setChoiceValues([
+    'Email','Phone calls','Text messages','Video calls','In-person meetings']).setRequired(true);
+  form.addMultipleChoiceItem().setTitle('When would you like to finalize the contract?').setChoiceValues([
+    'Within 1 week','Within 2 weeks','Within 1 month','Within 2 months','I need more time to decide']).setRequired(true);
+  form.addParagraphTextItem().setTitle('Additional Comments or Questions').setRequired(false);
+}
+
+// Fix date formatting in formatFieldValue
+function formatFieldValue(value) {
+  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
+    // Format as MM/dd/yyyy
+    const mm = String(value.getMonth() + 1).padStart(2, '0');
+    const dd = String(value.getDate()).padStart(2, '0');
+    const yyyy = value.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
+  }
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (value === null || value === undefined) return '';
+  return String(value);
+}
 
 /**
  * Wedding Contract Generator - Google Apps Script
@@ -1137,22 +1231,16 @@ function getRowDataFromArray(headers, rowData) {
  * Formats field values for proper display in contracts
  */
 function formatFieldValue(value) {
-  if (value instanceof Date) {
-    return Utilities.formatDate(value, Session.getScriptTimeZone(), 'MM/dd/yyyy');
+  if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
+    // Format as MM/dd/yyyy
+    const mm = String(value.getMonth() + 1).padStart(2, '0');
+    const dd = String(value.getDate()).padStart(2, '0');
+    const yyyy = value.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
   }
-  
-  if (typeof value === 'number') {
-    // Check if it looks like currency
-    if (value > 0 && value < 1000000) {
-      return value.toLocaleString('en-US', {
-        style: 'currency',
-        currency: 'USD'
-      });
-    }
-    return value.toString();
-  }
-  
-  return value ? value.toString() : '';
+  if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+  if (value === null || value === undefined) return '';
+  return String(value);
 }
 
 /**
@@ -1760,7 +1848,6 @@ function createWeddingContractSpreadsheet() {
     
     // Create pricing calculator sheet
     const pricingSheet = spreadsheet.insertSheet('Pricing Calculator');
-    setupPricingCalculatorSheet(pricingSheet);
     
     console.log(`Wedding contract spreadsheet created: ${spreadsheet.getName()}`);
     return spreadsheet;
