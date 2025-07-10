@@ -1,0 +1,16 @@
+{
+  "scriptId": "1nfwvjcSvymQK-dyHG17s2aIfEIAy83HPe2-cWLxR0--ZQtQEN4AwEiN6",
+  "rootDir": "",
+  "projectId": "allwave-services-automation",
+  "scriptExtensions": [
+    ".js",
+    ".gs"
+  ],
+  "htmlExtensions": [
+    ".html"
+  ],
+  "jsonExtensions": [
+    ".json"
+  ],
+  "filePushOrder": []
+}
