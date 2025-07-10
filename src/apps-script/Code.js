@@ -1034,20 +1034,21 @@ function setupFormSubmissionTrigger(form) {
   try {
     const formId = form.getId();
     // Clean up old triggers to prevent duplicates
-    const existingTriggers = ScriptApp.getUserTriggers(form);
+    const existingTriggers = ScriptApp.getProjectTriggers();
     for (const trigger of existingTriggers) {
       if (trigger.getHandlerFunction() === 'onEnhancedFormSubmit') {
         ScriptApp.deleteTrigger(trigger);
       }
     }
 
-    // Create a new trigger
+    // Create a new trigger for the spreadsheet's on change event
+    const ss = SpreadsheetApp.openById(form.getDestinationId());
     ScriptApp.newTrigger('onEnhancedFormSubmit')
-      .forForm(formId)
-      .onFormSubmit()
+      .forSpreadsheet(ss)
+      .onChange()
       .create();
     
-    console.log(`Form submission trigger created successfully for form ID: ${formId}`);
+    console.log(`Spreadsheet 'onChange' trigger created successfully for form submission processing.`);
     
   } catch (error) {
     console.error(`Error setting up form submission trigger: ${error.message}`);
@@ -1177,24 +1178,66 @@ function calculateEstimatedPricing(formData) {
  */
 function onEnhancedFormSubmit(e) {
   try {
-    const formData = e.values;
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Contract Tracking');
-    
-    // Find the next available row in the contract tracking sheet
-    const nextRow = sheet.getLastRow() + 1;
-    
-    // Set the values for the new row
-    sheet.getRange(nextRow, 1, 1, formData.length).setValues([formData]);
-    
-    // Calculate and set the estimated pricing
-    const estimatedTotal = calculateEstimatedPricing(formData);
-    sheet.getRange(nextRow, 10).setValue(estimatedTotal);
-    
-    // Log the submission for debugging
-    console.log(`Form submitted: ${JSON.stringify(formData)}`);
-    
+    if (!e || !e.range) {
+      console.error('Invalid event object: `e.range` is missing. The trigger may need to be re-created for the sheet.');
+      return;
+    }
+
+    const sheet = e.range.getSheet();
+    if (sheet.getName() !== 'Form Responses') {
+      console.log('Submission was not on the "Form Responses" sheet. Skipping contract generation.');
+      return;
+    }
+
+    const row = e.range.getRow();
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const values = sheet.getRange(row, 1, 1, sheet.getLastColumn()).getValues()[0];
+
+    const responseData = {};
+    headers.forEach((header, i) => {
+      responseData[header] = values[i];
+    });
+
+    console.log(`Processing form submission for row ${row}: ${JSON.stringify(responseData)}`);
+
+    // Now, populate the "Contract Tracking" sheet
+    const ss = sheet.getParent();
+    const contractsSheet = ss.getSheetByName('Contract Tracking');
+    const nextContractRow = contractsSheet.getLastRow() + 1;
+
+    const contractId = `WED-${new Date().getFullYear()}-${String(nextContractRow - 1).padStart(3, '0')}`;
+    const clientName1 = responseData['Primary Contact Name'] || '';
+    const clientName2 = responseData['Partner/Spouse Name'] || '';
+    const clientNames = clientName2 ? `${clientName1} & ${clientName2}` : clientName1;
+
+    const contractRowData = [
+      contractId,
+      clientNames,
+      responseData['Email Address'],
+      responseData['Phone Number'],
+      formatFieldValue(responseData['Wedding Date']),
+      responseData['Which services do you need?'],
+      responseData['Ceremony Venue Name'],
+      responseData['Expected Number of Guests'],
+      responseData['Total Budget Range for Our Services'],
+      0, // Placeholder for Estimated Total
+      'Pending', // Initial Status
+      new Date(),
+      new Date(),
+      'Generated from form submission.'
+    ];
+
+    contractsSheet.getRange(nextContractRow, 1, 1, contractRowData.length).setValues([contractRowData]);
+    console.log(`Added new entry to 'Contract Tracking' sheet in row ${nextContractRow}.`);
+
+    // Finally, generate the contract document
+    const mergeData = getRowData(nextContractRow, ss); // Use the new getRowData function
+    const docId = createContractDocument(mergeData);
+
+    console.log(`Successfully generated contract document with ID: ${docId}`);
+
   } catch (error) {
-    console.error('Error processing form submission:', error);
+    console.error('Error during onEnhancedFormSubmit:', error.stack);
   }
 }
 
@@ -1214,7 +1257,7 @@ function onEnhancedFormSubmit(e) {
 
 // Configuration - UPDATE THESE VALUES
 const CONFIG = {
-  TEMPLATE_DOC_ID: 'YOUR_TEMPLATE_DOC_ID_HERE', // Replace with your Google Docs template ID
+  TEMPLATE_DOC_ID: '1ObHyfoU3H4oCTAhocYagg89TOGGTQ_o8ajUntJ6E45Q', // Replace with your Google Docs template ID
   OUTPUT_FOLDER_NAME: 'Generated Wedding Contracts', // Folder name for generated contracts
   EMAIL_CONTRACTS: false, // Set to true to automatically email contracts
   SHEET_NAMES: {
@@ -1344,8 +1387,8 @@ function generateAndEmailContract() {
 /**
  * Gets data from all sheets for a specific row
  */
-function getRowData(row) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+function getRowData(row, spreadsheet) {
+  const ss = spreadsheet || SpreadsheetApp.getActiveSpreadsheet();
   let mergeData = {};
   
   // Get data from all configured sheets
@@ -1391,10 +1434,10 @@ function getRowDataFromArray(headers, rowData) {
  */
 function formatFieldValue(value) {
   if (Object.prototype.toString.call(value) === '[object Date]' && !isNaN(value)) {
-    // Format as MM/dd/yyyy
-    const mm = String(value.getMonth() + 1).padStart(2, '0');
-    const dd = String(value.getDate()).padStart(2, '0');
-    const yyyy = value.getFullYear();
+    // Format as MM/dd/yyyy using UTC to avoid timezone-related errors
+    const mm = String(value.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(value.getUTCDate()).padStart(2, '0');
+    const yyyy = value.getUTCFullYear();
     return `${mm}/${dd}/${yyyy}`;
   }
   if (typeof value === 'boolean') return value ? 'Yes' : 'No';
@@ -1408,15 +1451,17 @@ function formatFieldValue(value) {
 function createContractDocument(mergeData) {
   try {
     // Validate required fields
-    if (!mergeData.Client_Primary_Name) {
-      throw new Error('Client_Primary_Name is required');
+    if (!mergeData.Client_Primary_Name && !mergeData['Client Names']) {
+      throw new Error('Client name is required');
     }
     
     // Get or create output folder
     const outputFolder = getOrCreateFolder(CONFIG.OUTPUT_FOLDER_NAME);
     
     // Create document name
-    const docName = `Wedding Contract - ${mergeData.Client_Primary_Name}${mergeData.Client_Secondary_Name ? ' & ' + mergeData.Client_Secondary_Name : ''} - ${mergeData.Wedding_Date || 'TBD'}`;
+    const clientName = mergeData['Client Names'] || mergeData.Client_Primary_Name;
+    const weddingDate = mergeData['Wedding Date'] || mergeData.Wedding_Date || 'TBD';
+    const docName = `Wedding Contract - ${clientName} - ${formatFieldValue(new Date(weddingDate))}`;
     
     // Copy template
     const templateFile = DriveApp.getFileById(CONFIG.TEMPLATE_DOC_ID);
@@ -1519,11 +1564,15 @@ function testTemplate() {
     
     const docId = createContractDocument(sampleData);
     
-    SpreadsheetApp.getUi().alert(
-      'Test Successful!', 
-      `Test contract created successfully.\n\nDocument ID: ${docId}\n\nPlease review the generated document to ensure merge fields are working correctly.`, 
-      SpreadsheetApp.getUi().ButtonSet.OK
-    );
+    const successMessage = `Test Successful! Test contract created successfully. Document ID: ${docId}. Please review the generated document.`;
+    console.log(successMessage);
+    
+    // Try to show an alert if in a UI context
+    try {
+      SpreadsheetApp.getUi().alert(successMessage);
+    } catch (uiError) {
+      // Silently fail if no UI context is available
+    }
     
   } catch (error) {
     handleError('testTemplate', error);
@@ -1566,7 +1615,8 @@ Need help? Check the implementation guide documentation.`;
  * Handles errors consistently
  */
 function handleError(functionName, error) {
-  console.error(`Error in ${functionName}:`, error);
+  const errorMessage = `Error in ${functionName}: ${error.stack || error.message}`;
+  console.error(errorMessage);
   
   let userMessage = `An error occurred in ${functionName}:\n\n${error.message}`;
   
@@ -1578,7 +1628,12 @@ function handleError(functionName, error) {
     userMessage += '\n\nPlease check that you have edit permissions for the template document.';
   }
   
-  SpreadsheetApp.getUi().alert('Error', userMessage, SpreadsheetApp.getUi().ButtonSet.OK);
+  // Try to show an alert if in a UI context, otherwise just log it.
+  try {
+    SpreadsheetApp.getUi().alert('Error', userMessage, SpreadsheetApp.getUi().ButtonSet.OK);
+  } catch (uiError) {
+    console.log('UI not available, error logged to console.');
+  }
 }
 
 /**
@@ -1602,383 +1657,6 @@ function getDocIdFromUrl() {
   }
 }
 
-// ===================================================================
-// SYSTEM TESTING AND VALIDATION FUNCTIONS
-// ===================================================================
-
-/**
- * Comprehensive test suite for the integrated wedding automation system
- * Tests both form creation and contract generation functionality
- */
-function runSystemTests() {
-  try {
-    console.log('=== Starting Wedding Automation System Tests ===');
-    const results = {
-      timestamp: new Date(),
-      tests: {},
-      summary: { passed: 0, failed: 0, errors: [] }
-    };
-    
-    // Test 1: Form Creation Functions
-    results.tests.formCreation = testFormCreationFunctions();
-    
-    // Test 2: Contract Generation Functions
-    results.tests.contractGeneration = testContractGenerationFunctions();
-    
-    // Test 3: Configuration Validation
-    results.tests.configuration = testConfiguration();
-    
-    // Test 4: Helper Functions
-    results.tests.helpers = testHelperFunctions();
-    
-    // Calculate summary
-    Object.values(results.tests).forEach(testResult => {
-      if (testResult.passed) {
-        results.summary.passed++;
-      } else {
-        results.summary.failed++;
-        results.summary.errors.push(testResult.error);
-      }
-    });
-    
-    // Display results
-    displayTestResults(results);
-    
-    return results;
-    
-  } catch (error) {
-    console.error('Critical error in test suite:', error);
-    throw new Error(`Test suite failed: ${error.message}`);
-  }
-}
-
-/**
- * Tests the form creation functionality
- */
-function testFormCreationFunctions() {
-  let testForm, testSpreadsheet;
-  try {
-    console.log('Testing Phase 2 form creation functions...');
-    
-    // 1. Test the enhanced form and spreadsheet creation
-    const result = createEnhancedWeddingIntakeForm();
-    testForm = result.form;
-    testSpreadsheet = result.spreadsheet;
-
-    if (!testForm || !testSpreadsheet) {
-      throw new Error('createEnhancedWeddingIntakeForm did not return a form and spreadsheet.');
-    }
-    console.log('✓ Form and spreadsheet created successfully.');
-
-    // 2. Verify the form is linked to the spreadsheet
-    const destinationId = testForm.getDestinationId();
-    if (destinationId !== testSpreadsheet.getId()) {
-      throw new Error('Form is not linked to the correct spreadsheet.');
-    }
-    console.log('✓ Form is correctly linked to the spreadsheet.');
-
-    // 3. Verify the spreadsheet has the required sheets
-    const sheetNames = testSpreadsheet.getSheets().map(s => s.getName());
-    const requiredSheets = ['Form Responses', 'Contract Tracking', 'Status Tracking', 'Pricing Calculator'];
-    for (const sheetName of requiredSheets) {
-      if (!sheetNames.includes(sheetName)) {
-        throw new Error(`Spreadsheet is missing the "${sheetName}" sheet.`);
-      }
-    }
-    console.log('✓ Spreadsheet contains all required sheets.');
-
-    console.log('✓ Form creation functions test passed');
-    return { passed: true, message: 'Enhanced form creation and spreadsheet setup working correctly.' };
-    
-  } catch (error) {
-    console.error('Form creation test failed:', error);
-    return { passed: false, error: error.message };
-  } finally {
-    // 4. Clean up created test files
-    cleanupTestFiles(testForm, testSpreadsheet);
-  }
-}
-
-/**
- * Helper function to delete test files to avoid clutter.
- * @param {GoogleAppsScript.Forms.Form} form - The form to delete.
- * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} spreadsheet - The spreadsheet to delete.
- */
-function cleanupTestFiles(form, spreadsheet) {
-  try {
-    if (form) {
-      const formId = form.getId();
-      DriveApp.getFileById(formId).setTrashed(true);
-      console.log(`✓ Test form (ID: ${formId}) deleted.`);
-    }
-    if (spreadsheet) {
-      const spreadsheetId = spreadsheet.getId();
-      DriveApp.getFileById(spreadsheetId).setTrashed(true);
-      console.log(`✓ Test spreadsheet (ID: ${spreadsheetId}) deleted.`);
-    }
-  } catch (e) {
-    console.error(`Cleanup failed. Manual cleanup may be required. Error: ${e.message}`);
-  }
-}
-
-/**
- * Tests the contract generation functionality
- */
-function testContractGenerationFunctions() {
-  try {
-    console.log('Testing contract generation functions...');
-    
-    // Check if main contract functions exist
-    const requiredContractFunctions = [
-      'onOpen',
-      'generateSingleContract',
-      'generateAllContracts', 
-      'generateAndEmailContract',
-      'getRowData',
-      'formatFieldValue',
-      'createContractDocument',
-      'emailContract',
-      'getOrCreateFolder',
-      'testTemplate',
-      'showSetupInstructions',
-      'handleError'
-    ];
-    
-    for (const funcName of requiredContractFunctions) {
-      if (typeof eval(funcName) !== 'function') {
-        throw new Error(`${funcName} function not found`);
-      }
-    }
-    
-    console.log('✓ All contract generation functions are defined');
-    
-    // Test configuration object
-    if (typeof CONFIG === 'undefined') {
-      throw new Error('CONFIG object not found');
-    }
-    
-    const requiredConfigKeys = ['TEMPLATE_DOC_ID', 'OUTPUT_FOLDER_NAME', 'SHEET_NAMES'];
-    for (const key of requiredConfigKeys) {
-      if (!(key in CONFIG)) {
-        throw new Error(`CONFIG.${key} not found`);
-      }
-    }
-    
-    console.log('✓ CONFIG object structure is valid');
-    
-    // Test formatFieldValue function with sample data
-    const testDate = new Date('2025-06-15');
-    const formattedDate = formatFieldValue(testDate);
-    if (!formattedDate.includes('06/15/2025')) {
-      throw new Error('Date formatting test failed');
-    }
-    
-    const testNumber = 5000;
-    const formattedCurrency = formatFieldValue(testNumber);
-    if (!formattedCurrency.includes('$5,000.00')) {
-      throw new Error('Currency formatting test failed');
-    }
-    
-    console.log('✓ Data formatting functions working correctly');
-    console.log('✓ Contract generation functions test passed');
-    
-    return { passed: true, message: 'Contract generation functions working correctly' };
-    
-  } catch (error) {
-    console.error('Contract generation test failed:', error);
-    return { passed: false, error: error.message };
-  }
-}
-
-/**
- * Tests system configuration and dependencies
- */
-function testConfiguration() {
-  try {
-    console.log('Testing system configuration...');
-    
-    // Test Google Apps Script services availability
-    const services = [
-      { name: 'FormApp', service: FormApp },
-      { name: 'SpreadsheetApp', service: SpreadsheetApp },
-      { name: 'DocumentApp', service: DocumentApp },
-      { name: 'DriveApp', service: DriveApp },
-      { name: 'GmailApp', service: GmailApp },
-      { name: 'Utilities', service: Utilities }
-    ];
-    
-    for (const { name, service } of services) {
-      if (typeof service === 'undefined') {
-        throw new Error(`${name} service not available`);
-      }
-    }
-    
-    console.log('✓ All required Google Apps Script services are available');
-    
-    // Test configuration completeness
-    const warnings = [];
-    
-    if (CONFIG.TEMPLATE_DOC_ID === 'YOUR_TEMPLATE_DOC_ID_HERE') {
-      warnings.push('TEMPLATE_DOC_ID needs to be configured');
-    }
-    
-    if (warnings.length > 0) {
-      console.log('⚠️ Configuration warnings:', warnings);
-      return { 
-        passed: true, 
-        message: 'Configuration valid with warnings', 
-        warnings: warnings 
-      };
-    }
-    
-    console.log('✓ Configuration test passed');
-    
-    return { passed: true, message: 'System configuration is valid' };
-    
-  } catch (error) {
-    console.error('Configuration test failed:', error);
-    return { passed: false, error: error.message };
-  }
-}
-
-/**
- * Tests helper and utility functions
- */
-function testHelperFunctions() {
-  try {
-    console.log('Testing helper functions...');
-    
-    // Test getDocIdFromUrl (without UI interaction)
-    if (typeof getDocIdFromUrl !== 'function') {
-      throw new Error('getDocIdFromUrl function not found');
-    }
-    
-    console.log('✓ Helper functions test passed');
-    
-    return { passed: true, message: 'Helper functions working correctly' };
-    
-  } catch (error) {
-    console.error('Helper functions test failed:', error);
-    return { passed: false, error: error.message };
-  }
-}
-
-/**
- * Displays test results in a formatted way
- */
-function displayTestResults(results) {
-  const summary = `
-=== WEDDING AUTOMATION SYSTEM TEST RESULTS ===
-Timestamp: ${results.timestamp}
-
-SUMMARY:
-✓ Passed: ${results.summary.passed}
-✗ Failed: ${results.summary.failed}
-
-DETAILED RESULTS:
-${Object.entries(results.tests).map(([testName, result]) => 
-  `${result.passed ? '✓' : '✗'} ${testName}: ${result.message || result.error}`
-).join('\n')}
-
-${results.summary.failed > 0 ? 
-  `\nERRORS:\n${results.summary.errors.join('\n')}` : 
-  '\n🎉 ALL TESTS PASSED! System is ready for deployment.'
-}
-
-${results.tests.configuration?.warnings ? 
-  `\nWARNINGS:\n${results.tests.configuration.warnings.join('\n')}` : 
-  ''
-}
-`;
-
-  console.log(summary);
-  
-  // If we're in a spreadsheet context, show UI alert
-  try {
-    if (typeof SpreadsheetApp !== 'undefined') {
-      SpreadsheetApp.getUi().alert(
-        'System Test Results',
-        summary,
-        SpreadsheetApp.getUi().ButtonSet.OK
-      );
-    }
-  } catch (e) {
-    // UI not available, just log
-    console.log('UI not available for alert display');
-  }
-}
-
-/**
- * Quick smoke test - tests basic functionality without creating actual forms/docs
- */
-function runSmokeTest() {
-  try {
-    console.log('Running quick smoke test...');
-    
-    // Test that all main functions are defined
-    const criticalFunctions = [
-      'createWeddingIntakeForm', // Phase 1
-      'onOpen', 
-      'generateSingleContract',
-      'formatFieldValue',
-      'createEnhancedWeddingIntakeForm', // Phase 2
-      'createWeddingContractSpreadsheet', // Phase 2
-      'onEnhancedFormSubmit', // Phase 2
-      'processFormResponse', // Phase 2
-      'calculateEstimatedPricing' // Phase 2
-    ];
-    
-    for (const funcName of criticalFunctions) {
-      if (typeof this[funcName] !== 'function') { // Use this[funcName] for global scope
-        throw new Error(`Critical function ${funcName} not found`);
-      }
-    }
-    
-    // Test basic data formatting
-    const testData = formatFieldValue(new Date('2025-06-15'));
-    if (!testData.includes('2025')) {
-      throw new Error('Date formatting failed');
-    }
-    
-    console.log('✓ Smoke test passed - system appears functional');
-    
-    // Try to show UI alert only if in a UI context
-    try {
-      if (typeof SpreadsheetApp !== 'undefined') {
-        SpreadsheetApp.getUi().alert(
-          'Smoke Test Results',
-          '✓ Quick test passed!\n\nAll critical functions are available and basic formatting works correctly.\n\nYou can now proceed with full testing or Phase 2 development.',
-          SpreadsheetApp.getUi().ButtonSet.OK
-        );
-      }
-    } catch (e) {
-      // UI not available, just log
-      console.log('UI not available for alert display');
-    }
-    
-    return true;
-    
-  } catch (error) {
-    console.error('Smoke test failed:', error);
-    
-    // Try to show UI alert only if in a UI context
-    try {
-      if (typeof SpreadsheetApp !== 'undefined') {
-        SpreadsheetApp.getUi().alert(
-          'Smoke Test Failed',
-          `✗ Critical error detected:\n\n${error.message}\n\nPlease review the code integration before proceeding.`,
-          SpreadsheetApp.getUi().ButtonSet.OK
-        );
-      }
-    } catch (e) {
-      // UI not available, just log
-      console.log('UI not available for alert display');
-    }
-    
-    return false;
-  }
-}
-
 /**
  * PHASE 2: FORM-TO-SHEETS INTEGRATION & ENHANCEMENT
  * Enhanced form creation with automatic spreadsheet connection
@@ -1990,51 +1668,6 @@ function runSmokeTest() {
  */
 function createWeddingContractSpreadsheet() {
   try {
-    // Create a new spreadsheet
-    const spreadsheet = SpreadsheetApp.create('Wedding Services Contract Management');
-    
-    // Set up the main responses sheet (this will be automatically linked to the form)
-    const responsesSheet = spreadsheet.getSheets()[0];
-    responsesSheet.setName('Form Responses');
-    
-    // Create contract tracking sheet
-    const contractsSheet = spreadsheet.insertSheet('Contract Tracking');
-    setupContractTrackingSheet(contractsSheet);
-    
-    // Create status tracking sheet
-    const statusSheet = spreadsheet.insertSheet('Status Tracking');
-    setupStatusTrackingSheet(statusSheet);
-    
-    // Create pricing calculator sheet
-    const pricingSheet = spreadsheet.insertSheet('Pricing Calculator');
-    
-    console.log(`Wedding contract spreadsheet created: ${spreadsheet.getName()}`);
-    return spreadsheet;
-    
-  } catch (error) {
-    console.error('Error creating wedding contract spreadsheet:', error);
-    throw error;
-  }
-}
-
-/**
- * Sets up the contract tracking sheet with proper headers and formatting
- */
-function setupContractTrackingSheet(sheet) {
-  // Set up headers
-  const headers = [
-    'Contract ID',
-    'Client Names', 
-    'Email',
-    'Phone',
-    'Wedding Date',
-    'Services Requested',
-    'Venue',
-    'Guest Count',
-    'Budget Range',
-    'Estimated Total',
-    'Contract Status',
-    'Date Created',
     'Date Modified',
     'Notes'
   ];
@@ -2206,3 +1839,117 @@ function createEnhancedWeddingIntakeForm() {
     throw error;
   }
 }
+
+/**
+ * Helper function to find a form response item by its title.
+ * @param {FormApp.ItemResponse[]} itemResponses An array of item responses.
+ * @param {string} title The title of the item to find.
+ * @return {string|string[]|null} The response for the found item, or null if not found.
+ */
+function getResponseByTitle(itemResponses, title) {
+  for (var i = 0; i < itemResponses.length; i++) {
+    if (itemResponses[i].getItem().getTitle() === title) {
+      return itemResponses[i].getResponse();
+    }
+  }
+  return null;
+}
+
+
+/**
+ * =================================================================
+ * TESTING & UTILITY FUNCTIONS
+ * =================================================================
+ */
+
+/**
+ * Runs a quick smoke test to check for critical function availability.
+ */
+function runSmokeTest() {
+  try {
+    console.log('Running quick smoke test...');
+    
+    const criticalFunctions = [
+      'createWeddingIntakeForm',
+      'createEnhancedWeddingIntakeForm',
+      'processFormResponse',
+      'generateSingleContract',
+      'calculateEstimatedPricing',
+      'setupFormSubmissionTrigger'
+    ];
+    
+    for (const funcName of criticalFunctions) {
+      if (typeof this[funcName] !== 'function') {
+        throw new Error(`Critical function "${funcName}" is not defined.`);
+      }
+    }
+    
+    // Test basic data formatting using a reliable date constructor
+    const testData = formatFieldValue(new Date('2025-06-15T00:00:00Z'));
+    if (!testData.includes('06/15/2025')) {
+      throw new Error(`Date formatting smoke test failed. Expected "06/15/2025", got "${testData}".`);
+    }
+    
+    console.log('✓ Smoke test passed - system appears functional');
+    
+  } catch (error) {
+    const message = `Smoke test failed: [${error.toString()}]`;
+    console.error(message);
+    // Use Logger for environments where console might not be fully available
+    Logger.log(message);
+    // Try to show an alert if UI is available
+    try {
+      SpreadsheetApp.getUi().alert('Smoke Test Failed', message, SpreadsheetApp.getUi().ButtonSet.OK);
+    } catch (uiError) {
+      console.info('UI not available for alert display');
+    }
+    throw error;
+  }
+}
+
+
+/**
+ * Processes the form response upon submission.
+ * @param {Object} e The event object for the form submission trigger.
+ */
+function processFormResponse(e) {
+  try {
+    if (!e || !e.response) {
+        throw new Error("Invalid event object or response property is missing.");
+    }
+    const formResponse = e.response;
+    const itemResponses = formResponse.getItemResponses();
+
+    // Extract data using question titles
+    const clientName1 = getResponseByTitle(itemResponses, "Primary Contact - Bride/Groom/Partner 1");
+    const clientName2 = getResponseByTitle(itemResponses, "Secondary Contact - Bride/Groom/Partner 2");
+    const eventDate = getResponseByTitle(itemResponses, "Event Date");
+    const services = getResponseByTitle(itemResponses, "Services Requested");
+
+    let fullClientName = clientName1;
+    if (clientName2) {
+      fullClientName += ' & ' + clientName2;
+    }
+
+    if (!clientName1 || !eventDate || !services) {
+      console.error("Missing required information in form response. Cannot generate contract.");
+      return;
+    }
+
+    // Call the contract generation function
+    generateContract(fullClientName, new Date(eventDate), services);
+
+  } catch (error) {
+    console.error('Error processing form response: ' + error.toString());
+    console.error('Stack: ' + error.stack);
+    // Optionally, send an email notification about the failure
+    // MailApp.sendEmail("your-email@example.com", "Error in Wedding Form", "Error: " + error.toString());
+  }
+}
+
+
+/**
+ * =================================================================
+ * CONTRACT GENERATION
+ * =================================================================
+ */
